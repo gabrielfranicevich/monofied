@@ -1,0 +1,92 @@
+:root {
+  --brand-beige: #E8DCCA;
+  --brand-mustard: #D4A574;
+  --brand-wood: #5D4037;
+  --brand-bronze: #B08D57;
+  --brand-cream: #FDFBF7;
+  --brand-dark: #2C1810;
+  --brand-pastel-peach: #FFDAB9;
+  --brand-pastel-mint: #98FF98;
+  --brand-pastel-lavender: #E6E6FA;
+  --brand-pastel-corn: #FFF8DC;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply m-0 p-0 font-sans text-brand-dark min-h-screen;
+    background-color: var(--brand-beige);
+  }
+
+  #root {
+    width: 100%;
+    min-height: 100vh;
+  }
+}
+
+.bg-brand-beige {
+  background-color: var(--brand-beige);
+}
+
+.bg-brand-mustard {
+  background-color: var(--brand-mustard);
+}
+
+.bg-brand-wood {
+  background-color: var(--brand-wood);
+}
+
+.bg-brand-bronze {
+  background-color: var(--brand-bronze);
+}
+
+.bg-brand-cream {
+  background-color: var(--brand-cream);
+}
+
+.bg-brand-dark {
+  background-color: var(--brand-dark);
+}
+
+.bg-brand-pastel-peach {
+  background-color: var(--brand-pastel-peach);
+}
+
+.bg-brand-pastel-mint {
+  background-color: var(--brand-pastel-mint);
+}
+
+.bg-brand-pastel-lavender {
+  background-color: var(--brand-pastel-lavender);
+}
+
+.bg-brand-pastel-corn {
+  background-color: var(--brand-pastel-corn);
+}
+
+.text-brand-wood {
+  color: var(--brand-wood);
+}
+
+.text-brand-dark {
+  color: var(--brand-dark);
+}
+
+.border-brand-wood {
+  border-color: var(--brand-wood);
+}
+
+.border-brand-dark {
+  border-color: var(--brand-dark);
+}
+
+.border-brand-bronze {
+  border-color: var(--brand-bronze);
+}
+
+.bg-jungle-pattern {
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%235D4037' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
