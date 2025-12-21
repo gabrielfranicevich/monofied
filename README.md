@@ -1,4 +1,4 @@
-# 🌴 Mono
+# [🌴 Mono](https://mono-bjiz.onrender.com/)
 
 En este juego, la mayoría de los jugadores son **Civiles** que conocen una palabra secreta, pero uno o más jugadores son **Monos** que no la conocen. El objetivo de los Civiles es identificar a los Monos, mientras que los Monos deben camuflarse y tratar de descubrir la palabra secreta a través de las pistas de los demás.
 
@@ -58,3 +58,7 @@ En este juego, la mayoría de los jugadores son **Civiles** que conocen una pala
    *El servidor correrá en el puerto `3000` (o el definido en el entorno) y servirá la aplicación desde la carpeta `dist/`.*
 
 ---
+
+## 🌐 Jugar online
+
+Para jugar online, solo debes ir a la página [Mono](https://mono-bjiz.onrender.com/).
