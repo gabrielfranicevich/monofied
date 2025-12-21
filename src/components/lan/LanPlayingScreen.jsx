@@ -139,7 +139,7 @@ const LanPlayingScreen = ({ roomData, playerName, playerId, submitHint, finishTu
       </div>
 
       {/* Turn Notification */}
-      {gamePhase === 'playing' && isMyTurn && (
+      {gamePhase === 'playing' && gameType === 'chat' && isMyTurn && (
         <div className="mb-4 bg-brand-mustard p-3 rounded-xl shadow-md border-2 border-brand-wood animate-pulse">
           <div className="text-white font-bold text-xl uppercase tracking-widest text-center">
             ¡ES TU TURNO!
@@ -157,7 +157,7 @@ const LanPlayingScreen = ({ roomData, playerName, playerId, submitHint, finishTu
               const p = roomData.players.find(pl => pl.playerId === pid);
               if (!p) return null;
               return (
-                <div key={pid} className={`flex items-center gap-3 p-3 rounded-xl mb-2 ${pid === currentTurnPlayerId ? 'bg-brand-mustard text-white shadow-md transform scale-105' : 'bg-white text-brand-wood/60'}`}>
+                <div key={pid} className={`flex items-center gap-3 p-3 rounded-xl mb-2 'bg-white text-brand-wood/60'`}>
                   <div className="font-bold">{idx + 1}.</div>
                   <div className="font-bold flex-1">{p.name}</div>
                 </div>

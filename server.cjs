@@ -342,29 +342,39 @@ io.on('connection', (socket) => {
             const mostVotedIds = sortedTargets.filter(pair => pair[1] === highestVoteCount).map(pair => pair[0]);
 
             // Check if ANY of the most voted is a Mono
-            const caughtMono = mostVotedIds.some(id => room.gameData.monoIds.includes(id));
+            const caughtMonoIds = mostVotedIds.filter(id => room.gameData.monoIds.includes(id));
+            const escapedMonoIds = room.gameData.monoIds.filter(id => !mostVotedIds.includes(id));
+
+            room.gameData.caughtMonoIds = caughtMonoIds;
+            room.gameData.escapedMonoIds = escapedMonoIds;
 
             console.log('Voting Result:', {
               mostVotedIds,
               monoIds: room.gameData.monoIds,
-              caughtMono
+              caughtMonoIds,
+              escapedMonoIds
             });
 
-            if (caughtMono) {
-              // Mono Caught! -> Mono Guessing Phase
-              console.log('Mono caught! Switching to mono_guessing');
+            if (caughtMonoIds.length > 0) {
+              // At least one Mono caught -> Mono Guessing Phase
+              console.log('One or more Monos caught! Switching to mono_guessing');
               room.gameData.state = 'mono_guessing';
             } else {
-              // Civilian Caught -> Mono Wins
-              console.log('Civilian caught! Mono wins.');
+              // No Mono caught -> Monos win (all of them since they all escaped/weren't caught)
+              console.log('No Mono caught! Monos win.');
               room.gameData.state = 'results';
               room.gameData.winner = 'monos';
-              room.gameData.winnerNames = room.players.filter(p => room.gameData.monoIds.includes(p.playerId)).map(p => p.name);
+              room.gameData.winnerNames = room.players
+                .filter(p => room.gameData.monoIds.includes(p.playerId))
+                .map(p => p.name);
             }
           } else {
-            // No votes?
+            // No votes? Monos win
             room.gameData.state = 'results';
-            room.gameData.winner = 'monos'; // Stalemate favors chaos?
+            room.gameData.winner = 'monos';
+            room.gameData.winnerNames = room.players
+              .filter(p => room.gameData.monoIds.includes(p.playerId))
+              .map(p => p.name);
           }
 
           io.to(roomId).emit('gameDataUpdated', room.gameData);
@@ -390,11 +400,26 @@ io.on('connection', (socket) => {
         room.gameData.state = 'results';
 
         if (correct) {
+          // If correct, this mono wins + any escaped monos
           room.gameData.winner = 'monos';
-          room.gameData.winnerNames = room.players.filter(p => room.gameData.monoIds.includes(p.playerId)).map(p => p.name);
+          const escapedNames = room.players
+            .filter(p => room.gameData.escapedMonoIds.includes(p.playerId))
+            .map(p => p.name);
+          room.gameData.winnerNames = [...escapedNames, player.name];
         } else {
-          room.gameData.winner = 'civilians';
-          room.gameData.winnerNames = room.players.filter(p => !room.gameData.monoIds.includes(p.playerId)).map(p => p.name);
+          // If incorrect, check if there were escaped monos who win
+          if (room.gameData.escapedMonoIds.length > 0) {
+            room.gameData.winner = 'monos';
+            room.gameData.winnerNames = room.players
+              .filter(p => room.gameData.escapedMonoIds.includes(p.playerId))
+              .map(p => p.name);
+          } else {
+            // All monos were caught and this one failed guess -> Civilians win
+            room.gameData.winner = 'civilians';
+            room.gameData.winnerNames = room.players
+              .filter(p => !room.gameData.monoIds.includes(p.playerId))
+              .map(p => p.name);
+          }
         }
         io.to(roomId).emit('gameDataUpdated', room.gameData);
       }
