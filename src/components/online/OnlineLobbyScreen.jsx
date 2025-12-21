@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Users, ChevronDown, ChevronUp, MessageSquare } from '../Icons';
 
-const LanLobbyScreen = ({ setScreen, lanGames = [], lanGamesExpanded, setLanGamesExpanded, joinLanGame, playerName, setPlayerName, roomIdFromUrl, clearRoomId, socket, getRandomName }) => {
+const OnlineLobbyScreen = ({ setScreen, onlineGames = [], onlineGamesExpanded, setOnlineGamesExpanded, joinOnlineGame, playerName, setPlayerName, roomIdFromUrl, clearRoomId, socket, getRandomName }) => {
   const [roomStatus, setRoomStatus] = useState(null);
   const [checkingRoom, setCheckingRoom] = useState(false);
   const [selectedRoomId, setSelectedRoomId] = useState(null);
@@ -29,7 +29,7 @@ const LanLobbyScreen = ({ setScreen, lanGames = [], lanGamesExpanded, setLanGame
     }
   }, [targetRoomId, socket]);
 
-  const safeLanGames = Array.isArray(lanGames) ? lanGames : [];
+  const safeOnlineGames = Array.isArray(onlineGames) ? onlineGames : [];
   const showDirectJoin = !!roomIdFromUrl || !!selectedRoomId;
 
   return (
@@ -54,7 +54,7 @@ const LanLobbyScreen = ({ setScreen, lanGames = [], lanGamesExpanded, setLanGame
           <ArrowLeft size={28} />
         </button>
         <h1 className="text-3xl font-bold text-brand-wood tracking-wider drop-shadow-sm">
-          {showDirectJoin ? 'UNIRSE A PARTIDA' : 'PARTIDAS LAN'}
+          {showDirectJoin ? 'UNIRSE A PARTIDA' : 'PARTIDAS ONLINE'}
         </h1>
       </div>
 
@@ -104,7 +104,7 @@ const LanLobbyScreen = ({ setScreen, lanGames = [], lanGamesExpanded, setLanGame
                         finalName = getRandomName();
                         setPlayerName(finalName);
                       }
-                      joinLanGame(targetRoomId, finalName);
+                      joinOnlineGame(targetRoomId, finalName);
                     }
                   }}
                   className="w-full p-4 border-2 border-brand-wood/20 rounded-2xl focus:border-brand-bronze focus:outline-none bg-brand-beige/30 text-brand-wood font-bold text-lg text-center"
@@ -117,7 +117,7 @@ const LanLobbyScreen = ({ setScreen, lanGames = [], lanGamesExpanded, setLanGame
                       finalName = getRandomName();
                       setPlayerName(finalName);
                     }
-                    joinLanGame(targetRoomId, finalName);
+                    joinOnlineGame(targetRoomId, finalName);
                   }}
                   className="w-full bg-brand-mustard text-white py-4 rounded-xl font-bold text-xl shadow-[4px_4px_0px_0px_#5D4037] hover:translate-y-[-2px] active:translate-y-1 transition-all border-2 border-brand-wood"
                 >
@@ -135,7 +135,7 @@ const LanLobbyScreen = ({ setScreen, lanGames = [], lanGamesExpanded, setLanGame
 
             <div className="mt-6 mb-2">
               <button
-                onClick={() => setLanGamesExpanded(!lanGamesExpanded)}
+                onClick={() => setOnlineGamesExpanded(!onlineGamesExpanded)}
                 className="w-full flex items-center justify-between p-4 bg-white rounded-2xl hover:bg-brand-beige/20 transition-all border-2 border-brand-wood shadow-[4px_4px_0px_0px_rgba(93,64,55,1)] active:translate-y-1 active:shadow-[2px_2px_0px_0px_rgba(93,64,55,1)]"
               >
                 <div className="flex items-center gap-3">
@@ -144,19 +144,19 @@ const LanLobbyScreen = ({ setScreen, lanGames = [], lanGamesExpanded, setLanGame
                   </div>
                   <h2 className="text-lg font-bold text-brand-wood leading-tight uppercase tracking-wide">Partidas Disponibles</h2>
                 </div>
-                {lanGamesExpanded ? <ChevronUp size={24} className="text-brand-wood" /> : <ChevronDown size={24} className="text-brand-wood" />}
+                {onlineGamesExpanded ? <ChevronUp size={24} className="text-brand-wood" /> : <ChevronDown size={24} className="text-brand-wood" />}
               </button>
             </div>
 
-            {lanGamesExpanded && (
+            {onlineGamesExpanded && (
               <div className="mt-4 p-4 bg-brand-wood/5 rounded-2xl border-2 border-brand-wood/10 border-dashed max-h-[400px] overflow-y-auto pr-2">
                 <div className="space-y-3">
-                  {safeLanGames.length === 0 ? (
+                  {safeOnlineGames.length === 0 ? (
                     <div className="text-center py-12 text-brand-wood/50 font-bold">
                       No hay partidas encontradas...
                     </div>
                   ) : (
-                    safeLanGames.map(game => (
+                    safeOnlineGames.map(game => (
                       <button
                         key={game.id}
                         onClick={() => {
@@ -197,7 +197,7 @@ const LanLobbyScreen = ({ setScreen, lanGames = [], lanGamesExpanded, setLanGame
           </div>
 
           <button
-            onClick={() => setScreen('lan_create')}
+            onClick={() => setScreen('online_create')}
             className="w-full bg-brand-wood text-white py-5 rounded-2xl font-bold text-xl shadow-[4px_4px_0px_0px_#2C1810] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_0px_#2C1810] active:translate-y-1 active:shadow-[2px_2px_0px_0px_#2C1810] transition-all flex items-center justify-center gap-3 border-2 border-brand-dark"
           >
             <div className="bg-white/20 p-1 rounded-lg">
@@ -211,4 +211,4 @@ const LanLobbyScreen = ({ setScreen, lanGames = [], lanGamesExpanded, setLanGame
   );
 };
 
-export default LanLobbyScreen;
+export default OnlineLobbyScreen;

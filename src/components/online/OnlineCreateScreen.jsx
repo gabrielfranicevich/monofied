@@ -1,11 +1,11 @@
 import React from 'react';
 import { ArrowLeft, MessageSquare, Users } from '../Icons';
 
-const LanCreateScreen = ({ setScreen, newGameSettings, setNewGameSettings, lanGames, setLanGames, playerNames, createLanGame, playerName, setPlayerName, getRandomName }) => (
+const OnlineCreateScreen = ({ setScreen, newGameSettings, setNewGameSettings, onlineGames, setOnlineGames, playerNames, createOnlineGame, playerName, setPlayerName, getRandomName }) => (
   <div className="p-6 relative z-10 h-full flex flex-col">
     <div className="relative mb-6 flex items-center justify-center">
       <button
-        onClick={() => setScreen('lan_lobby')}
+        onClick={() => setScreen('online_lobby')}
         className="absolute left-0 p-2 rounded-xl hover:bg-brand-wood/10 text-brand-wood transition-all active:scale-95"
         title="Volver"
       >
@@ -31,7 +31,7 @@ const LanCreateScreen = ({ setScreen, newGameSettings, setNewGameSettings, lanGa
                 finalName = getRandomName();
                 setPlayerName(finalName);
               }
-              createLanGame(finalName);
+              createOnlineGame(finalName);
             }
           }}
           className="w-full p-4 border-2 border-brand-wood/20 rounded-2xl focus:border-brand-bronze focus:outline-none bg-white text-brand-wood placeholder-brand-wood/40 font-bold text-lg"
@@ -53,7 +53,7 @@ const LanCreateScreen = ({ setScreen, newGameSettings, setNewGameSettings, lanGa
                 finalName = getRandomName();
                 setPlayerName(finalName);
               }
-              createLanGame(finalName);
+              createOnlineGame(finalName);
             }
           }}
           className="w-full p-4 border-2 border-brand-wood/20 rounded-2xl focus:border-brand-bronze focus:outline-none bg-white text-brand-wood placeholder-brand-wood/40 font-bold text-lg"
@@ -128,13 +128,13 @@ const LanCreateScreen = ({ setScreen, newGameSettings, setNewGameSettings, lanGa
 
     <button
       onClick={() => {
-        if (createLanGame) {
+        if (createOnlineGame) {
           let finalName = playerName.trim();
           if (!finalName) {
             finalName = getRandomName();
             setPlayerName(finalName);
           }
-          createLanGame(finalName);
+          createOnlineGame(finalName);
         } else {
           const newGame = {
             id: Date.now(),
@@ -144,8 +144,8 @@ const LanCreateScreen = ({ setScreen, newGameSettings, setNewGameSettings, lanGa
             type: newGameSettings.type,
             status: 'waiting'
           };
-          setLanGames([...lanGames, newGame]);
-          setScreen('lan_lobby');
+          setOnlineGames([...onlineGames, newGame]);
+          setScreen('online_lobby');
         }
       }}
       className="w-full bg-brand-bronze text-white py-5 rounded-2xl font-bold text-xl shadow-[4px_4px_0px_0px_#5D4037] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_0px_#5D4037] active:translate-y-1 active:shadow-[2px_2px_0px_0px_#5D4037] transition-all flex items-center justify-center gap-3 border-2 border-brand-wood mt-4"
@@ -155,4 +155,4 @@ const LanCreateScreen = ({ setScreen, newGameSettings, setNewGameSettings, lanGa
   </div>
 );
 
-export default LanCreateScreen;
+export default OnlineCreateScreen;

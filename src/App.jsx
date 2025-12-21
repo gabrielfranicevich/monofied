@@ -5,10 +5,10 @@ import HomeScreen from './components/HomeScreen';
 import SetupScreen from './components/SetupScreen';
 import RevealScreen from './components/RevealScreen';
 import PlayingScreen from './components/PlayingScreen';
-import LanLobbyScreen from './components/lan/LanLobbyScreen';
-import LanCreateScreen from './components/lan/LanCreateScreen';
-import LanWaitingRoom from './components/lan/LanWaitingRoom';
-import LanPlayingScreen from './components/lan/LanPlayingScreen';
+import OnlineLobbyScreen from './components/online/OnlineLobbyScreen';
+import OnlineCreateScreen from './components/online/OnlineCreateScreen';
+import OnlineWaitingRoom from './components/online/OnlineWaitingRoom';
+import OnlinePlayingScreen from './components/online/OnlinePlayingScreen';
 import { useSocket } from './hooks/useSocket';
 
 function App() {
@@ -29,10 +29,10 @@ function App() {
   const [turnOrderExpanded, setTurnOrderExpanded] = useState(true);
   const [allPlayersExpanded, setAllPlayersExpanded] = useState(false);
   const [rulesExpanded, setRulesExpanded] = useState(false);
-  const [lanGamesExpanded, setLanGamesExpanded] = useState(true);
+  const [onlineGamesExpanded, setOnlineGamesExpanded] = useState(true);
 
-  // LAN Game State
-  const [lanGames, setLanGames] = useState([]);
+  // Online Game State
+  const [onlineGames, setOnlineGames] = useState([]);
   const [newGameSettings, setNewGameSettings] = useState({
     name: '',
     players: 3,
@@ -55,7 +55,7 @@ function App() {
     return id;
   });
 
-  const { socket, isConnected } = useSocket(setLanGames, setScreen, setRoomId, setIsHost, setRoomData);
+  const { socket, isConnected } = useSocket(setOnlineGames, setScreen, setRoomId, setIsHost, setRoomData);
 
   // Auto-rejoin on refresh/connect
   useEffect(() => {
@@ -79,13 +79,13 @@ function App() {
     const path = window.location.pathname.substring(1); // Remove leading /
     const pathUpper = path.toUpperCase();
 
-    if (path === 'lan') {
-      setScreen('lan_lobby');
+    if (path === 'online') {
+      setScreen('online_lobby');
     } else if (pathUpper && pathUpper.length === 4) {
-      // 4-letter room code - redirect to /lan and set roomId
+      // 4-letter room code - redirect to /online and set roomId
       setRoomId(pathUpper);
-      setScreen('lan_lobby');
-      window.history.replaceState(null, '', '/lan');
+      setScreen('online_lobby');
+      window.history.replaceState(null, '', '/online');
     } else if (path) {
       // Clear invalid path
       window.history.replaceState(null, '', '/');
@@ -95,13 +95,13 @@ function App() {
       const newPath = window.location.pathname.substring(1);
       const newPathUpper = newPath.toUpperCase();
 
-      if (newPath === 'lan') {
-        setScreen('lan_lobby');
+      if (newPath === 'online') {
+        setScreen('online_lobby');
         setRoomId(null);
       } else if (newPathUpper && newPathUpper.length === 4) {
         setRoomId(newPathUpper);
-        setScreen('lan_lobby');
-        window.history.replaceState(null, '', '/lan');
+        setScreen('online_lobby');
+        window.history.replaceState(null, '', '/online');
       } else {
         setRoomId(null);
         setScreen('home');
@@ -114,11 +114,11 @@ function App() {
 
   // Update URL when entering a game room
   useEffect(() => {
-    if ((screen === 'lan_waiting' || screen === 'lan_playing') && roomData?.id) {
+    if ((screen === 'online_waiting' || screen === 'online_playing') && roomData?.id) {
       window.history.pushState(null, '', `/${roomData.id}`);
-    } else if (screen === 'lan_lobby' || screen === 'lan_create') {
+    } else if (screen === 'online_lobby' || screen === 'online_create') {
       if (!roomId) {
-        window.history.pushState(null, '', '/lan');
+        window.history.pushState(null, '', '/online');
       }
       // If roomId exists, URL is already set to the room code
     } else if (screen === 'home') {
@@ -242,7 +242,7 @@ function App() {
   };
 
   const resetGame = () => {
-    if (screen.startsWith('lan_')) {
+    if (screen.startsWith('online_')) {
       if (isHost && socket) {
         socket.emit('resetGame', { roomId });
       }
@@ -261,8 +261,8 @@ function App() {
     setRulesExpanded(false);
   };
 
-  // LAN Methods
-  const createLanGame = (nameOverride) => {
+  // Online Methods
+  const createOnlineGame = (nameOverride) => {
     if (socket) {
       socket.emit('createRoom', {
         playerName: nameOverride || playerName || 'Host',
@@ -277,7 +277,7 @@ function App() {
     }
   };
 
-  const joinLanGame = (id, nameOverride) => {
+  const joinOnlineGame = (id, nameOverride) => {
     // go to the game/waiting screen in specific url
     if (socket) {
       socket.emit('joinRoom', { roomId: id, playerName: nameOverride || playerName || 'Jugador', playerId: mySessionId });
@@ -299,18 +299,18 @@ function App() {
     setRoomData(null);
     setRoomId(null);
     setIsHost(false);
-    setScreen('lan_lobby');
+    setScreen('online_lobby');
     localStorage.removeItem('lastRoomId');
-    window.history.pushState(null, '', '/lan');
+    window.history.pushState(null, '', '/online');
   };
 
-  const resetLanGame = () => {
+  const resetOnlineGame = () => {
     if (socket && roomId) {
       socket.emit('resetGame', { roomId });
     }
   };
 
-  const startLanGame = () => {
+  const startOnlineGame = () => {
     if (socket && isHost && roomId) {
       const themes = roomData.settings.selectedThemes || ['básico'];
       const allWords = [...new Set(themes.flatMap(theme => THEMES[theme]))];
@@ -358,13 +358,13 @@ function App() {
 
         {screen === 'home' && <HomeScreen setScreen={setScreen} />}
 
-        {screen === 'lan_lobby' && (
-          <LanLobbyScreen
+        {screen === 'online_lobby' && (
+          <OnlineLobbyScreen
             setScreen={setScreen}
-            lanGames={lanGames}
-            lanGamesExpanded={lanGamesExpanded}
-            setLanGamesExpanded={setLanGamesExpanded}
-            joinLanGame={joinLanGame}
+            onlineGames={onlineGames}
+            onlineGamesExpanded={onlineGamesExpanded}
+            setOnlineGamesExpanded={setOnlineGamesExpanded}
+            joinOnlineGame={joinOnlineGame}
             playerName={playerName}
             setPlayerName={setPlayerName}
             roomIdFromUrl={roomId} // Pass the ID from URL if present
@@ -374,33 +374,33 @@ function App() {
           />
         )}
 
-        {screen === 'lan_create' && (
-          <LanCreateScreen
+        {screen === 'online_create' && (
+          <OnlineCreateScreen
             setScreen={setScreen}
             newGameSettings={newGameSettings}
             setNewGameSettings={setNewGameSettings}
-            lanGames={lanGames}
-            setLanGames={setLanGames}
+            onlineGames={onlineGames}
+            setOnlineGames={setOnlineGames}
             playerNames={playerNames}
-            createLanGame={createLanGame}
+            createOnlineGame={createOnlineGame}
             playerName={playerName}
             setPlayerName={setPlayerName}
             getRandomName={getRandomName}
           />
         )}
 
-        {screen === 'lan_waiting' && roomData && (
-          <LanWaitingRoom
+        {screen === 'online_waiting' && roomData && (
+          <OnlineWaitingRoom
             roomData={roomData}
             isHost={isHost}
             leaveRoom={leaveRoom}
-            startGame={startLanGame}
+            startGame={startOnlineGame}
             updateRoomSettings={updateRoomSettings}
           />
         )}
 
-        {screen === 'lan_playing' && roomData && (
-          <LanPlayingScreen
+        {screen === 'online_playing' && roomData && (
+          <OnlinePlayingScreen
             roomData={roomData}
             playerName={playerName}
             playerId={mySessionId}
@@ -409,7 +409,7 @@ function App() {
             submitVote={submitVote}
             leaveRoom={leaveRoom}
             isHost={isHost}
-            resetGame={resetLanGame}
+            resetGame={resetOnlineGame}
             submitMonoGuess={submitMonoGuess}
           />
         )}

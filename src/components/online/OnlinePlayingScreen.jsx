@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ArrowLeft } from '../Icons';
 
-const LanPlayingScreen = ({ roomData, playerName, playerId, submitHint, finishTurn, submitVote, leaveRoom, isHost, resetGame, submitMonoGuess }) => {
+const OnlinePlayingScreen = ({ roomData, playerName, playerId, submitHint, finishTurn, submitVote, leaveRoom, isHost, resetGame, submitMonoGuess }) => {
   const [hint, setHint] = useState('');
   const [selectedVotes, setSelectedVotes] = useState([]);
   const [monoGuess, setMonoGuess] = useState('');
@@ -307,4 +307,4 @@ const LanPlayingScreen = ({ roomData, playerName, playerId, submitHint, finishTu
   );
 };
 
-export default LanPlayingScreen;
+export default OnlinePlayingScreen;

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { io } from 'socket.io-client';
 
-export const useSocket = (setLanGames, setScreen, setRoomId, setIsHost, setRoomData) => {
+export const useSocket = (setOnlineGames, setScreen, setRoomId, setIsHost, setRoomData) => {
   const [socket, setSocket] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
 
@@ -27,12 +27,12 @@ export const useSocket = (setLanGames, setScreen, setRoomId, setIsHost, setRoomD
       setRoomId(room.id);
       setIsHost(true);
       setRoomData(room);
-      setScreen('lan_waiting');
+      setScreen('online_waiting');
     });
 
     newSocket.on('roomList', (rooms) => {
       // roomList usually comes as an array from server based on broadcastRoomList()
-      setLanGames(rooms);
+      setOnlineGames(rooms);
     });
 
     newSocket.on('roomJoined', (room) => {
@@ -40,7 +40,7 @@ export const useSocket = (setLanGames, setScreen, setRoomId, setIsHost, setRoomD
       setRoomId(room.id);
       setIsHost(false);
       setRoomData(room);
-      setScreen('lan_waiting');
+      setScreen('online_waiting');
     });
 
     newSocket.on('roomUpdated', (room) => {
@@ -51,7 +51,7 @@ export const useSocket = (setLanGames, setScreen, setRoomId, setIsHost, setRoomD
     newSocket.on('gameStarted', (room) => {
       console.log('Game started:', room);
       setRoomData(room);
-      setScreen('lan_playing');
+      setScreen('online_playing');
     });
 
     newSocket.on('gameUpdated', (room) => {
@@ -70,7 +70,7 @@ export const useSocket = (setLanGames, setScreen, setRoomId, setIsHost, setRoomD
     newSocket.on('gameReset', (room) => {
       console.log('Game reset:', room);
       setRoomData(room);
-      setScreen('lan_waiting');
+      setScreen('online_waiting');
     });
 
     newSocket.on('roomClosed', ({ message }) => {
@@ -79,7 +79,7 @@ export const useSocket = (setLanGames, setScreen, setRoomId, setIsHost, setRoomD
       setRoomData(null);
       setRoomId(null);
       setIsHost(false);
-      setScreen('lan_lobby');
+      setScreen('online_lobby');
     });
 
     newSocket.on('error', (msg) => {
@@ -87,7 +87,7 @@ export const useSocket = (setLanGames, setScreen, setRoomId, setIsHost, setRoomD
     });
 
     return () => newSocket.close();
-  }, [setLanGames, setScreen, setRoomId, setIsHost, setRoomData]);
+  }, [setOnlineGames, setScreen, setRoomId, setIsHost, setRoomData]);
 
   return { socket, isConnected };
 };

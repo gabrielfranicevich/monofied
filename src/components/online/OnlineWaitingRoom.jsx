@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Users, MessageSquare, Play, ChevronDown, ChevronUp, Edit2, Eye } from '../Icons';
 import { THEMES } from '../../data/constants';
 
-const LanWaitingRoom = ({ roomData, isHost, leaveRoom, startGame, updateRoomSettings }) => {
+const OnlineWaitingRoom = ({ roomData, isHost, leaveRoom, startGame, updateRoomSettings }) => {
   const [themesExpanded, setThemesExpanded] = useState(false);
   const [monosExpanded, setMonosExpanded] = useState(false);
 
@@ -218,4 +218,4 @@ const LanWaitingRoom = ({ roomData, isHost, leaveRoom, startGame, updateRoomSett
   );
 };
 
-export default LanWaitingRoom;
+export default OnlineWaitingRoom;
