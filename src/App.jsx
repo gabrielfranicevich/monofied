@@ -45,14 +45,34 @@ function App() {
     return localStorage.getItem('playerName') || '';
   });
 
+  // Session ID for persistence
+  const [mySessionId] = useState(() => {
+    let id = localStorage.getItem('mySessionId');
+    if (!id) {
+      id = 'user_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+      localStorage.setItem('mySessionId', id);
+    }
+    return id;
+  });
+
+  const { socket, isConnected } = useSocket(setLanGames, setScreen, setRoomId, setIsHost, setRoomData);
+
+  // Auto-rejoin on refresh/connect
+  useEffect(() => {
+    if (socket && isConnected) {
+      const lastRoomId = localStorage.getItem('lastRoomId');
+      if (lastRoomId) {
+        socket.emit('rejoinRoom', { roomId: lastRoomId, playerId: mySessionId });
+      }
+    }
+  }, [socket, isConnected, mySessionId]);
+
   // Persist playerName
   useEffect(() => {
     if (playerName) {
       localStorage.setItem('playerName', playerName);
     }
   }, [playerName]);
-
-  const { socket, isConnected } = useSocket(setLanGames, setScreen, setRoomId, setIsHost, setRoomData);
 
   // URL Routing
   useEffect(() => {
@@ -106,34 +126,40 @@ function App() {
     }
   }, [screen, roomData, roomId]);
 
-  const toggleTheme = (theme) => {
-    if (selectedThemes.includes(theme)) {
-      if (selectedThemes.length > 1) {
-        setSelectedThemes(selectedThemes.filter(t => t !== theme));
+  const toggleTheme = React.useCallback((theme) => {
+    setSelectedThemes(prev => {
+      if (prev.includes(theme)) {
+        if (prev.length > 1) {
+          return prev.filter(t => t !== theme);
+        }
+        return prev;
+      } else {
+        return [...prev, theme];
       }
-    } else {
-      setSelectedThemes([...selectedThemes, theme]);
-    }
-  };
+    });
+  }, []);
 
-  const updatePlayerName = (index, name) => {
-    const newNames = [...playerNames];
-    newNames[index] = name;
-    setPlayerNames(newNames);
+  const updatePlayerName = React.useCallback((index, name) => {
+    setPlayerNames(prev => {
+      const newNames = [...prev];
+      newNames[index] = name;
+      return newNames;
+    });
     if (index === 0) setPlayerName(name);
-  };
+  }, []);
 
-  const getRandomName = () => {
+  const getRandomName = React.useCallback(() => {
     const sustantivo = SUSTANTIVOS[Math.floor(Math.random() * SUSTANTIVOS.length)];
     const adjetivo = ADJETIVOS[Math.floor(Math.random() * ADJETIVOS.length)];
     return `${sustantivo} ${adjetivo}`;
-  };
+  }, []);
 
-  const generateRandomName = (index) => {
-    updatePlayerName(index, getRandomName());
-  };
+  const generateRandomName = React.useCallback((index) => {
+    const name = getRandomName();
+    updatePlayerName(index, name);
+  }, [updatePlayerName, getRandomName]);
 
-  const addPlayer = () => {
+  const addPlayer = React.useCallback(() => {
     const newNumPlayers = numPlayers + 1;
     setNumPlayers(newNumPlayers);
     setPlayerNames([...playerNames, '']);
@@ -141,9 +167,9 @@ function App() {
     if (numMonos > maxMonos) {
       setNumMonos(maxMonos);
     }
-  };
+  }, [numPlayers, playerNames, numMonos]);
 
-  const removePlayer = () => {
+  const removePlayer = React.useCallback(() => {
     if (numPlayers > 3) {
       const newNumPlayers = numPlayers - 1;
       setNumPlayers(newNumPlayers);
@@ -153,20 +179,21 @@ function App() {
         setNumMonos(maxMonos);
       }
     }
-  };
+  }, [numPlayers, playerNames, numMonos]);
 
-  const addMono = () => {
+  const addMono = React.useCallback(() => {
     const maxMonos = Math.ceil(numPlayers / 2) - 1;
     if (numMonos < maxMonos) {
       setNumMonos(numMonos + 1);
     }
-  };
+  }, [numPlayers, numMonos]);
 
-  const removeMono = () => {
+  const removeMono = React.useCallback(() => {
     if (numMonos > 1) {
       setNumMonos(numMonos - 1);
     }
-  };
+  }, [numMonos]);
+
 
   const startGame = () => {
     const allWords = [...new Set(selectedThemes.flatMap(theme => THEMES[theme]))];
@@ -243,15 +270,18 @@ function App() {
         settings: {
           players: newGameSettings.players,
           type: newGameSettings.type
-        }
+        },
+        playerId: mySessionId
       });
+      localStorage.setItem('lastRoomId', ''); // Will be set on join confirmation
     }
   };
 
   const joinLanGame = (id, nameOverride) => {
     // go to the game/waiting screen in specific url
     if (socket) {
-      socket.emit('joinRoom', { roomId: id, playerName: nameOverride || playerName || 'Jugador' });
+      socket.emit('joinRoom', { roomId: id, playerName: nameOverride || playerName || 'Jugador', playerId: mySessionId });
+      localStorage.setItem('lastRoomId', id);
     }
   };
 
@@ -263,13 +293,14 @@ function App() {
 
   const leaveRoom = () => {
     if (socket && roomId) {
-      socket.emit('leaveRoom', { roomId });
+      socket.emit('leaveRoom', { roomId, playerId: mySessionId });
     }
     // Clear room data but keep player name
     setRoomData(null);
     setRoomId(null);
     setIsHost(false);
     setScreen('lan_lobby');
+    localStorage.removeItem('lastRoomId');
     window.history.pushState(null, '', '/lan');
   };
 
@@ -299,12 +330,12 @@ function App() {
     }
   };
 
-  const submitVote = (votedPlayerIndices) => {
+  const submitVote = (voteIds) => {
     if (socket && roomId) {
       // Ensure it's an array
-      const indices = Array.isArray(votedPlayerIndices) ? votedPlayerIndices : [votedPlayerIndices];
-      // Send indices directly as server logic uses indices for mono verification
-      socket.emit('submitVote', { roomId, votedPlayerIndices: indices });
+      const votes = Array.isArray(voteIds) ? voteIds : [voteIds];
+      // Send IDs directly as server logic uses IDs
+      socket.emit('submitVote', { roomId, voteIds: votes });
     }
   };
 
@@ -372,7 +403,7 @@ function App() {
           <LanPlayingScreen
             roomData={roomData}
             playerName={playerName}
-            playerId={socket?.id}
+            playerId={mySessionId}
             submitHint={submitHint}
             finishTurn={finishTurn}
             submitVote={submitVote}

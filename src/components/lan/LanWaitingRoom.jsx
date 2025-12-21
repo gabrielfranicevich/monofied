@@ -23,6 +23,13 @@ const LanWaitingRoom = ({ roomData, isHost, leaveRoom, startGame, updateRoomSett
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isHost, currentPlayers, startGame]);
 
+  // Fix: Auto-adjust numMonos if maxMonos drops below current setting
+  useEffect(() => {
+    if (isHost && numMonos > maxMonos) {
+      updateRoomSettings({ numMonos: maxMonos });
+    }
+  }, [isHost, numMonos, maxMonos, updateRoomSettings]);
+
   const toggleTheme = (theme) => {
     if (!isHost) return;
 

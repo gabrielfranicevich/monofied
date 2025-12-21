@@ -59,6 +59,14 @@ export const useSocket = (setLanGames, setScreen, setRoomId, setIsHost, setRoomD
       setRoomData(room);
     });
 
+    newSocket.on('gameDataUpdated', (gameData) => {
+      console.log('Game data updated:', gameData);
+      setRoomData(prevRoom => {
+        if (!prevRoom) return null;
+        return { ...prevRoom, gameData };
+      });
+    });
+
     newSocket.on('gameReset', (room) => {
       console.log('Game reset:', room);
       setRoomData(room);
