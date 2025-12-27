@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { io } from 'socket.io-client';
 
-export const useSocket = (setOnlineGames, setScreen, setRoomId, setIsHost, setRoomData) => {
+export const useSocket = (setOnlineGames, setLanGames, setScreen, setRoomId, setIsHost, setRoomData) => {
   const [socket, setSocket] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
 
@@ -33,6 +33,11 @@ export const useSocket = (setOnlineGames, setScreen, setRoomId, setIsHost, setRo
     newSocket.on('roomList', (rooms) => {
       // roomList usually comes as an array from server based on broadcastRoomList()
       setOnlineGames(rooms);
+    });
+
+    newSocket.on('lanGamesList', (games) => {
+      console.log('LAN games list received:', games);
+      setLanGames(games);
     });
 
     newSocket.on('roomJoined', (room) => {
@@ -87,7 +92,7 @@ export const useSocket = (setOnlineGames, setScreen, setRoomId, setIsHost, setRo
     });
 
     return () => newSocket.close();
-  }, [setOnlineGames, setScreen, setRoomId, setIsHost, setRoomData]);
+  }, [setOnlineGames, setLanGames, setScreen, setRoomId, setIsHost, setRoomData]);
 
   return { socket, isConnected };
 };

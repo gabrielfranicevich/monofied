@@ -33,6 +33,8 @@ function App() {
 
   // Online Game State
   const [onlineGames, setOnlineGames] = useState([]);
+  const [lanGames, setLanGames] = useState([]);
+  const [localIp, setLocalIp] = useState(null);
   const [newGameSettings, setNewGameSettings] = useState({
     name: '',
     players: 3,
@@ -55,7 +57,36 @@ function App() {
     return id;
   });
 
-  const { socket, isConnected } = useSocket(setOnlineGames, setScreen, setRoomId, setIsHost, setRoomData);
+  const { socket, isConnected } = useSocket(setOnlineGames, setLanGames, setScreen, setRoomId, setIsHost, setRoomData);
+
+  // Get local IP via WebRTC for LAN detection
+  useEffect(() => {
+    const getLocalIp = async () => {
+      try {
+        const pc = new RTCPeerConnection({ iceServers: [] });
+        pc.createDataChannel('');
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+
+        pc.onicecandidate = (e) => {
+          if (e.candidate) {
+            const parts = e.candidate.candidate.split(' ');
+            const ip = parts[4];
+            if (ip && ip.match(/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/)) {
+              setLocalIp(ip);
+              pc.close();
+            }
+          }
+        };
+
+        // Timeout cleanup
+        setTimeout(() => pc.close(), 5000);
+      } catch (err) {
+        console.log('Could not detect local IP:', err);
+      }
+    };
+    getLocalIp();
+  }, []);
 
   // Auto-rejoin on refresh/connect
   useEffect(() => {
@@ -271,7 +302,8 @@ function App() {
           players: newGameSettings.players,
           type: newGameSettings.type
         },
-        playerId: mySessionId
+        playerId: mySessionId,
+        localIp: localIp // Send local IP for LAN detection
       });
       localStorage.setItem('lastRoomId', ''); // Will be set on join confirmation
     }
@@ -362,6 +394,7 @@ function App() {
           <OnlineLobbyScreen
             setScreen={setScreen}
             onlineGames={onlineGames}
+            lanGames={lanGames}
             onlineGamesExpanded={onlineGamesExpanded}
             setOnlineGamesExpanded={setOnlineGamesExpanded}
             joinOnlineGame={joinOnlineGame}
@@ -371,6 +404,7 @@ function App() {
             clearRoomId={() => setRoomId(null)}
             socket={socket}
             getRandomName={getRandomName}
+            localIp={localIp}
           />
         )}
 

@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ArrowLeft } from '../Icons';
 
-const OnlinePlayingScreen = ({ roomData, playerName, playerId, submitHint, finishTurn, submitVote, leaveRoom, isHost, resetGame, submitMonoGuess }) => {
+const OnlinePlayingScreen = ({ roomData, playerId, submitHint, submitVote, leaveRoom, isHost, resetGame, submitMonoGuess }) => {
   const [hint, setHint] = useState('');
   const [selectedVotes, setSelectedVotes] = useState([]);
   const [monoGuess, setMonoGuess] = useState('');

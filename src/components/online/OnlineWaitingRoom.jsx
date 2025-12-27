@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Users, MessageSquare, Play, ChevronDown, ChevronUp, Edit2, Eye } from '../Icons';
+import { ArrowLeft, Users, MessageSquare, Play, ChevronDown, ChevronUp, Edit2, Eye, Copy, Check } from '../Icons';
 import { THEMES } from '../../data/constants';
 
 const OnlineWaitingRoom = ({ roomData, isHost, leaveRoom, startGame, updateRoomSettings }) => {
   const [themesExpanded, setThemesExpanded] = useState(false);
   const [monosExpanded, setMonosExpanded] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const selectedThemes = roomData.settings.selectedThemes || ['básico'];
   const numMonos = roomData.settings.numMonos || 1;
@@ -12,6 +13,16 @@ const OnlineWaitingRoom = ({ roomData, isHost, leaveRoom, startGame, updateRoomS
   // Same logic as SetupScreen: Max monos is ceil(players / 2) - 1
   // e.g. 3 players -> 1 mono. 4 players -> 1 mono. 5 players -> 2 monos.
   const maxMonos = Math.max(1, Math.ceil(currentPlayers / 2) - 1);
+
+  const copyGameCode = async () => {
+    try {
+      await navigator.clipboard.writeText(roomData.id);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
+  };
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -72,6 +83,26 @@ const OnlineWaitingRoom = ({ roomData, isHost, leaveRoom, startGame, updateRoomS
         <div className="text-center">
           <h1 className="text-xl font-bold text-brand-wood/60 uppercase tracking-widest">SALA</h1>
           <h2 className="text-4xl font-bold text-brand-wood tracking-wider">{roomData.roomName}</h2>
+        </div>
+      </div>
+
+      {/* Código de Juego */}
+      <div className="bg-brand-pastel-mint/50 p-4 rounded-2xl border-2 border-brand-wood/20 mb-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <span className="text-xs font-bold text-brand-wood/60 uppercase tracking-wider">Código de Juego</span>
+            <div className="text-3xl font-bold text-brand-wood tracking-[0.3em] mt-1">{roomData.id}</div>
+          </div>
+          <button
+            onClick={copyGameCode}
+            className={`p-3 rounded-xl border-2 transition-all ${copied
+              ? 'bg-brand-pastel-mint border-brand-wood text-brand-wood'
+              : 'bg-white border-brand-wood/20 text-brand-wood hover:bg-brand-beige/30'
+              }`}
+            title={copied ? '¡Copiado!' : 'Copiar código'}
+          >
+            {copied ? <Check size={20} /> : <Copy size={20} />}
+          </button>
         </div>
       </div>
 

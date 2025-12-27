@@ -56,8 +56,23 @@ function getLocalIp() {
   return 'localhost';
 }
 
+// Helper: Get IP subnet (first 3 octets for /24 matching)
+function getIpSubnet(ip) {
+  if (!ip) return null;
+  // Handle IPv6-mapped IPv4 (::ffff:x.x.x.x)
+  const cleanIp = ip.replace(/^::ffff:/, '');
+  const parts = cleanIp.split('.');
+  if (parts.length === 4) {
+    return parts.slice(0, 3).join('.');
+  }
+  return null; // IPv6 or invalid
+}
+
 io.on('connection', (socket) => {
-  console.log('A user connected:', socket.id);
+  // Get client IP
+  const clientIp = socket.handshake.headers['x-forwarded-for']?.split(',')[0]?.trim()
+    || socket.handshake.address;
+  console.log('A user connected:', socket.id, 'IP:', clientIp);
 
   // manda la lista de salas a todos
   function broadcastRoomList() {
@@ -90,7 +105,7 @@ io.on('connection', (socket) => {
     return Object.values(rooms).find(r => r.players.some(p => p.playerId === playerId));
   }
 
-  socket.on('createRoom', ({ playerName, roomName, settings, playerId }) => {
+  socket.on('createRoom', ({ playerName, roomName, settings, playerId, localIp }) => {
     console.log('createRoom received settings:', settings);
     const safeName = sanitizeName(playerName);
     const roomId = generateRoomCode();
@@ -106,6 +121,9 @@ io.on('connection', (socket) => {
       roomName: roomName || `${safeName}'s Game`,
       gameData: null,
       status: 'waiting',
+      // Store IP info for LAN detection
+      creatorPublicIp: clientIp,
+      creatorLocalIp: localIp || null,
       settings: {
         players: Number(settings?.players) || 3,
         type: settings?.type || 'in_person',
@@ -457,6 +475,39 @@ io.on('connection', (socket) => {
       status: r.status
     }));
     socket.emit('roomList', roomList);
+  });
+
+  // LAN game discovery - find games on same network
+  socket.on('requestLanGames', ({ localIp }) => {
+    const requesterPublicSubnet = getIpSubnet(clientIp);
+    const requesterLocalSubnet = getIpSubnet(localIp);
+
+    const lanGames = Object.values(rooms)
+      .filter(r => {
+        // Match by local IP subnet (same LAN) or public IP subnet (same network)
+        const roomLocalSubnet = getIpSubnet(r.creatorLocalIp);
+        const roomPublicSubnet = getIpSubnet(r.creatorPublicIp);
+
+        // Prefer local IP matching (true LAN)
+        if (requesterLocalSubnet && roomLocalSubnet && requesterLocalSubnet === roomLocalSubnet) {
+          return true;
+        }
+        // Fallback to public IP matching (same ISP/network)
+        if (requesterPublicSubnet && roomPublicSubnet && requesterPublicSubnet === roomPublicSubnet) {
+          return true;
+        }
+        return false;
+      })
+      .map(r => ({
+        id: r.id,
+        name: r.roomName || r.players[0].name + "'s Game",
+        players: r.players.length,
+        maxPlayers: r.settings.players,
+        type: r.settings.type,
+        status: r.status
+      }));
+
+    socket.emit('lanGamesList', lanGames);
   });
 
   socket.on('leaveRoom', ({ roomId }) => {
