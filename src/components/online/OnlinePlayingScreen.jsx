@@ -173,6 +173,21 @@ const OnlinePlayingScreen = ({ roomData, playerName, playerId, submitHint, finis
       {/* Playing Phase: Chat */}
       {gamePhase === 'playing' && gameType === 'chat' && (
         <div className="flex-NONE">
+          {gameData.hints?.length > 0 &&
+            <div className="mb-4 p-4 bg-white rounded-2xl border-2 border-brand-wood text-center shadow-sm relative overflow-hidden">
+              {gameData.hints?.map((hint, idx) => {
+                const player = roomData.players.find(pl => pl.playerId === hint.playerId);
+                if (!player) return null;
+
+                return (
+                  <p key={idx} className="mb-2 text-brand-wood">
+                    <span className="font-bold">{player.name}: </span>
+                    <span className="opacity-60">{hint.text}</span>
+                  </p>
+                );
+              })}
+            </div>
+          }
           {isMyTurn ? (
             <div className="flex gap-2">
               <input
@@ -256,6 +271,17 @@ const OnlinePlayingScreen = ({ roomData, playerName, playerId, submitHint, finis
           {amIMono ? (
             <div className="w-full">
               <p className="text-brand-wood font-bold mb-4">Adivina la palabra secreta para ganar:</p>
+              {gameData.hints?.map((hint, idx) => {
+                const player = roomData.players.find(pl => pl.playerId === hint.playerId);
+                if (!player || player.playerId === currentTurnPlayerId) return null;
+
+                return (
+                  <p key={idx} className="mb-2 text-brand-wood">
+                    <span className="font-bold">{player.name}: </span>
+                    <span className="opacity-60">{hint.text}</span>
+                  </p>
+                );
+              })}
               <div className="flex gap-2">
                 <input
                   type="text"
