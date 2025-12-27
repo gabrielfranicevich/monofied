@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Users, ChevronDown, ChevronUp, MessageSquare } from '../Icons';
+import { ArrowLeft, Users } from '../Icons';
+import JoinGameForm from './lobby/JoinGameForm';
+import GameCodeInput from './lobby/GameCodeInput';
+import GameListSection from './lobby/GameListSection';
 
 const OnlineLobbyScreen = ({ setScreen, onlineGames = [], lanGames = [], onlineGamesExpanded, setOnlineGamesExpanded, joinOnlineGame, playerName, setPlayerName, roomIdFromUrl, clearRoomId, socket, getRandomName, localIp }) => {
   const [roomStatus, setRoomStatus] = useState(null);
   const [checkingRoom, setCheckingRoom] = useState(false);
   const [selectedRoomId, setSelectedRoomId] = useState(null);
   const [lanGamesExpanded, setLanGamesExpanded] = useState(true);
-  const [gameCodeInput, setGameCodeInput] = useState('');
 
   const targetRoomId = roomIdFromUrl || selectedRoomId;
 
@@ -42,41 +44,7 @@ const OnlineLobbyScreen = ({ setScreen, onlineGames = [], lanGames = [], onlineG
   const safeOnlineGames = Array.isArray(onlineGames) ? onlineGames : [];
   const showDirectJoin = !!roomIdFromUrl || !!selectedRoomId;
 
-  // Helper function to render a game item
-  const renderGameItem = (game) => (
-    <button
-      key={game.id}
-      onClick={() => {
-        if (game.status === 'waiting') {
-          setSelectedRoomId(game.id);
-        }
-      }}
-      disabled={game.status !== 'waiting'}
-      className={`w-full text-left bg-white p-4 rounded-2xl border-2 border-brand-wood shadow-[4px_4px_0px_0px_rgba(93,64,55,0.1)] flex items-center justify-between group transition-all cursor-pointer ${game.status === 'waiting'
-        ? 'hover:border-brand-bronze hover:translate-x-1 focus:border-brand-bronze focus:translate-x-1 focus:outline-none'
-        : 'opacity-70 cursor-not-allowed'
-        }`}
-    >
-      <div>
-        <h3 className="font-bold text-lg text-brand-wood">{game.name}</h3>
-        <div className="flex items-center gap-3 text-xs font-bold uppercase tracking-wider text-brand-wood/60 mt-1">
-          <span className="flex items-center gap-1">
-            <Users size={14} /> {game.players}/{game.maxPlayers}
-          </span>
-          <span className="flex items-center gap-1">
-            {game.type === 'chat' ? <MessageSquare size={14} /> : <Users size={14} />}
-            {game.type === 'chat' ? 'Por Chat' : 'En Persona'}
-          </span>
-        </div>
-      </div>
-      <div className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest ${game.status === 'waiting'
-        ? 'bg-brand-pastel-mint text-brand-wood'
-        : 'bg-brand-wood/10 text-brand-wood/50'
-        }`}>
-        {game.status === 'waiting' ? 'Unirse' : 'Jugando'}
-      </div>
-    </button>
-  );
+
 
   return (
     <div className="p-6 relative z-10 h-full flex flex-col">
@@ -106,170 +74,45 @@ const OnlineLobbyScreen = ({ setScreen, onlineGames = [], lanGames = [], onlineG
 
       {showDirectJoin ? (
         <div className="flex-1 flex flex-col items-center justify-center p-4">
-          {checkingRoom ? (
-            <div className="text-center text-brand-wood font-bold">
-              Verificando sala...
-            </div>
-          ) : roomStatus && !roomStatus.exists ? (
-            <div className="bg-white p-6 rounded-3xl border-4 border-brand-wood shadow-[8px_8px_0px_0px_rgba(93,64,55,1)] w-full text-center">
-              <div className="text-6xl mb-4">❌</div>
-              <h2 className="text-2xl font-bold text-brand-wood mb-2">{roomStatus.error}</h2>
-              <p className="text-brand-wood/60 mb-4">La sala "{targetRoomId}" no existe</p>
-            </div>
-          ) : roomStatus && roomStatus.full ? (
-            <div className="bg-white p-6 rounded-3xl border-4 border-brand-wood shadow-[8px_8px_0px_0px_rgba(93,64,55,1)] w-full text-center">
-              <div className="text-6xl mb-4">🚫</div>
-              <h2 className="text-2xl font-bold text-brand-wood mb-2">{roomStatus.error}</h2>
-              <p className="text-brand-wood/60 mb-4">No puedes unirte a esta sala</p>
-            </div>
-          ) : roomStatus && roomStatus.room ? (
-            <div className="bg-white p-6 rounded-3xl border-4 border-brand-wood shadow-[8px_8px_0px_0px_rgba(93,64,55,1)] w-full text-center">
-              <h2 className="text-2xl font-bold text-brand-wood mb-2">
-                {roomStatus.room.roomName}
-              </h2>
-              <div className="flex justify-center gap-4 text-brand-wood/60 font-bold uppercase text-sm mb-6">
-                <span className="flex items-center gap-1"><Users size={16} /> {roomStatus.room.players.length}/{roomStatus.room.settings.players}</span>
-                <span className="flex items-center gap-1">
-                  {roomStatus.room.settings.type === 'chat' ? <MessageSquare size={16} /> : <Users size={16} />}
-                  {roomStatus.room.settings.type === 'chat' ? 'Chat' : 'Persona'}
-                </span>
-              </div>
-
-              <div className="space-y-4 text-left">
-                <label className="text-sm font-bold text-brand-wood uppercase tracking-wider ml-1">Tu Nombre</label>
-                <input
-                  type="text"
-                  value={playerName}
-                  onChange={(e) => setPlayerName(e.target.value)}
-                  placeholder="Ingresa tu nombre"
-                  autoFocus
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      let finalName = playerName.trim();
-                      if (!finalName) {
-                        finalName = getRandomName();
-                        setPlayerName(finalName);
-                      }
-                      joinOnlineGame(targetRoomId, finalName);
-                    }
-                  }}
-                  className="w-full p-4 border-2 border-brand-wood/20 rounded-2xl focus:border-brand-bronze focus:outline-none bg-brand-beige/30 text-brand-wood font-bold text-lg text-center"
-                />
-
-                <button
-                  onClick={() => {
-                    let finalName = playerName.trim();
-                    if (!finalName) {
-                      finalName = getRandomName();
-                      setPlayerName(finalName);
-                    }
-                    joinOnlineGame(targetRoomId, finalName);
-                  }}
-                  className="w-full bg-brand-mustard text-white py-4 rounded-xl font-bold text-xl shadow-[4px_4px_0px_0px_#5D4037] hover:translate-y-[-2px] active:translate-y-1 transition-all border-2 border-brand-wood"
-                >
-                  ENTRAR
-                </button>
-              </div>
-            </div>
-          ) : null}
+          <JoinGameForm
+            checkingRoom={checkingRoom}
+            roomStatus={roomStatus}
+            targetRoomId={targetRoomId}
+            playerName={playerName}
+            setPlayerName={setPlayerName}
+            joinOnlineGame={joinOnlineGame}
+            getRandomName={getRandomName}
+          />
         </div>
       ) : (
         <>
           {/* Game Code Input - Fixed at top, always visible */}
-          <div className="mb-4">
-            <label className="text-sm font-bold text-brand-wood uppercase tracking-wider ml-1">Código de Juego</label>
-            <div className="flex gap-2 mt-2">
-              <input
-                type="text"
-                value={gameCodeInput}
-                onChange={(e) => setGameCodeInput(e.target.value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 4))}
-                onPaste={(e) => {
-                  e.preventDefault();
-                  const pastedText = e.clipboardData.getData('text').toUpperCase().replace(/[^A-Z]/g, '').slice(0, 4);
-                  setGameCodeInput(pastedText);
-                }}
-                placeholder="XXXX"
-                maxLength={4}
-                className="flex-1 p-3 border-2 border-brand-wood/20 rounded-xl focus:border-brand-bronze focus:outline-none bg-white text-brand-wood font-bold text-lg text-center tracking-widest uppercase"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && gameCodeInput.length === 4) {
-                    setSelectedRoomId(gameCodeInput);
-                  }
-                }}
-              />
-              <button
-                onClick={() => {
-                  if (gameCodeInput.length === 4) {
-                    setSelectedRoomId(gameCodeInput);
-                  }
-                }}
-                disabled={gameCodeInput.length !== 4}
-                className="px-6 py-3 bg-brand-bronze text-white rounded-xl font-bold shadow-[2px_2px_0px_0px_#5D4037] hover:translate-y-[-1px] active:translate-y-0.5 transition-all border-2 border-brand-wood disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                UNIRSE
-              </button>
-            </div>
-          </div>
+          <GameCodeInput onJoin={setSelectedRoomId} />
 
           {/* Scrollable game lists */}
           <div className="flex-1 mb-6 overflow-y-auto">
-            {/* LAN Games Section - Only show if there are LAN games */}
-            {safeLanGames.length > 0 && (
-              <div className="mb-4">
-                <button
-                  onClick={() => setLanGamesExpanded(!lanGamesExpanded)}
-                  className="w-full flex items-center justify-between p-4 bg-brand-pastel-mint rounded-2xl hover:brightness-95 transition-all border-2 border-brand-wood shadow-[4px_4px_0px_0px_rgba(93,64,55,1)] active:translate-y-1 active:shadow-[2px_2px_0px_0px_rgba(93,64,55,1)]"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="bg-brand-wood p-2 rounded-lg text-white">
-                      <Users size={20} />
-                    </div>
-                    <div className="text-left">
-                      <h2 className="text-lg font-bold text-brand-wood leading-tight uppercase tracking-wide">Partidas LAN Disponibles</h2>
-                      <span className="text-xs text-brand-wood/70 font-bold">{safeLanGames.length} partida{safeLanGames.length !== 1 ? 's' : ''} en tu red</span>
-                    </div>
-                  </div>
-                  {lanGamesExpanded ? <ChevronUp size={24} className="text-brand-wood" /> : <ChevronDown size={24} className="text-brand-wood" />}
-                </button>
-                {lanGamesExpanded && (
-                  <div className="mt-2 p-4 bg-brand-pastel-mint/30 rounded-2xl border-2 border-brand-wood/10 border-dashed">
-                    <div className="space-y-3">
-                      {safeLanGames.map(renderGameItem)}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
+            {/* LAN Games Section */}
+            <GameListSection
+              title="Partidas LAN Disponibles"
+              subtitle={`${safeLanGames.length} partida${safeLanGames.length !== 1 ? 's' : ''} en tu red`}
+              icon={<Users size={20} />}
+              games={safeLanGames}
+              isExpanded={lanGamesExpanded}
+              onToggle={() => setLanGamesExpanded(!lanGamesExpanded)}
+              onJoin={setSelectedRoomId}
+              headerClassName="bg-brand-pastel-mint"
+            />
 
             {/* All Online Games Section */}
-            <div className="mb-2">
-              <button
-                onClick={() => setOnlineGamesExpanded(!onlineGamesExpanded)}
-                className="w-full flex items-center justify-between p-4 bg-white rounded-2xl hover:bg-brand-beige/20 transition-all border-2 border-brand-wood shadow-[4px_4px_0px_0px_rgba(93,64,55,1)] active:translate-y-1 active:shadow-[2px_2px_0px_0px_rgba(93,64,55,1)]"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="bg-brand-mustard p-2 rounded-lg text-white">
-                    <Users size={20} />
-                  </div>
-                  <h2 className="text-lg font-bold text-brand-wood leading-tight uppercase tracking-wide">Partidas Disponibles</h2>
-                </div>
-                {onlineGamesExpanded ? <ChevronUp size={24} className="text-brand-wood" /> : <ChevronDown size={24} className="text-brand-wood" />}
-              </button>
-            </div>
-
-            {onlineGamesExpanded && (
-              <div className="mt-2 p-4 bg-brand-wood/5 rounded-2xl border-2 border-brand-wood/10 border-dashed max-h-[300px] overflow-y-auto pr-2">
-                <div className="space-y-3">
-                  {safeOnlineGames.length === 0 ? (
-                    <div className="text-center py-12 text-brand-wood/50 font-bold">
-                      No hay partidas encontradas...
-                    </div>
-                  ) : (
-                    safeOnlineGames.map(renderGameItem)
-                  )}
-                </div>
-              </div>
-            )}
+            <GameListSection
+              title="Partidas Disponibles"
+              icon={<Users size={20} />}
+              games={safeOnlineGames}
+              isExpanded={onlineGamesExpanded}
+              onToggle={() => setOnlineGamesExpanded(!onlineGamesExpanded)}
+              onJoin={setSelectedRoomId}
+              emptyMessage="No hay partidas encontradas..."
+            />
           </div>
 
           <button
