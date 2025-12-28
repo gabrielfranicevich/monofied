@@ -5,7 +5,7 @@ const RoomStats = ({ currentPlayers, maxPlayers, gameType }) => (
     <div className="flex items-center justify-center gap-4 text-brand-wood font-bold">
       <div className="flex items-center gap-2">
         <Users size={20} />
-        <span>{currentPlayers}/{maxPlayers}</span>
+        <span>{currentPlayers}/{maxPlayers === 2 ? '∞' : maxPlayers}</span>
       </div>
       <div className="w-px h-6 bg-brand-wood/20"></div>
       <div className="flex items-center gap-2">

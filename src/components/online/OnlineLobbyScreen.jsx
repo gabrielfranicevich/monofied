@@ -44,7 +44,9 @@ const OnlineLobbyScreen = ({ setScreen, onlineGames = [], lanGames = [],
   }, [targetRoomId, socket]);
 
   const safeLanGames = Array.isArray(lanGames) ? lanGames : [];
-  const safeOnlineGames = Array.isArray(onlineGames) ? onlineGames : [];
+  const lanGameIds = new Set(safeLanGames.map(g => g.id));
+  const safeOnlineGames = (Array.isArray(onlineGames) ? onlineGames : [])
+    .filter(g => !lanGameIds.has(g.id));
   const showDirectJoin = !!roomIdFromUrl || !!selectedRoomId;
 
 

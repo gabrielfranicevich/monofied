@@ -14,9 +14,10 @@ export const useOnlineGame = (setScreen, mySessionId, localIp, playerName) => {
   // Creation Settings
   const [newGameSettings, setNewGameSettings] = useState({
     name: '',
-    players: 3,
+    players: 2, // 2 = unlimited mode, shows as ∞ in UI
     type: 'in_person'
   });
+
 
   useEffect(() => {
     const serverUrl = import.meta.env.PROD ? window.location.origin : undefined;

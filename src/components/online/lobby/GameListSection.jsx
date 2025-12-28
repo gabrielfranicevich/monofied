@@ -1,4 +1,5 @@
-import { ChevronDown, ChevronUp } from '../../Icons';
+import { useState, useEffect } from 'react';
+import { ChevronDown, ChevronUp, ChevronLeft, ChevronRight } from '../../Icons';
 import GameItem from './GameItem';
 
 const GameListSection = ({
@@ -12,7 +13,18 @@ const GameListSection = ({
   headerClassName = "bg-white",
   showCount = false
 }) => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const gamesPerPage = 3;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [games.length]);
+
   if (games.length === 0) return null;
+
+  const totalPages = Math.ceil(games.length / gamesPerPage);
+  const startIndex = (currentPage - 1) * gamesPerPage;
+  const paginatedGames = games.slice(startIndex, startIndex + gamesPerPage);
 
   return (
     <div className="mb-4">
@@ -35,9 +47,9 @@ const GameListSection = ({
       </button>
 
       {isExpanded && (
-        <div className={`mt-2 p-4 rounded-2xl border-2 border-brand-wood/10 border-dashed ${title.includes('LAN') ? 'bg-brand-pastel-mint/30' : 'bg-brand-wood/5 max-h-[300px] overflow-y-auto pr-2'}`}>
+        <div className={`mt-2 p-4 rounded-2xl border-2 border-brand-wood/10 border-dashed ${title.includes('LAN') ? 'bg-brand-pastel-mint/30' : 'bg-brand-wood/5 max-h-[400px] overflow-y-auto pr-2'}`}>
           <div className="space-y-3">
-            {games.map((game) => (
+            {paginatedGames.map((game) => (
               <GameItem
                 key={game.id}
                 game={game}
@@ -45,6 +57,36 @@ const GameListSection = ({
               />
             ))}
           </div>
+
+          {totalPages > 1 && (
+            <div className="mt-4 flex items-center justify-between border-t-2 border-brand-wood/10 pt-4 px-1">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setCurrentPage(prev => Math.max(1, prev - 1));
+                }}
+                disabled={currentPage === 1}
+                className="p-2 rounded-xl bg-brand-wood/10 text-brand-wood disabled:opacity-30 disabled:cursor-not-allowed hover:bg-brand-wood/20 transition-all active:scale-95"
+              >
+                <ChevronLeft size={20} />
+              </button>
+
+              <span className="text-sm font-bold text-brand-wood/70">
+                Página {currentPage} de {totalPages}
+              </span>
+
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setCurrentPage(prev => Math.min(totalPages, prev + 1));
+                }}
+                disabled={currentPage === totalPages}
+                className="p-2 rounded-xl bg-brand-wood/10 text-brand-wood disabled:opacity-30 disabled:cursor-not-allowed hover:bg-brand-wood/20 transition-all active:scale-95"
+              >
+                <ChevronRight size={20} />
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

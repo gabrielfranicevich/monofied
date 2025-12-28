@@ -1,6 +1,8 @@
-import { useState } from 'react';
-import { ChevronDown, ChevronUp, Edit2, Eye } from '../../Icons';
+import { useState, useEffect } from 'react';
+import { ChevronDown, ChevronUp, Edit2, Eye, Plus, X } from '../../Icons';
 import { THEMES } from '../../../data/constants';
+import { loadWordLists, saveWordList, deleteWordList } from '../../../utils/customWordLists';
+import WordListModal from './WordListModal';
 
 const GameSettingsSection = ({
   isHost,
@@ -13,6 +15,45 @@ const GameSettingsSection = ({
 }) => {
   const [themesExpanded, setThemesExpanded] = useState(false);
   const [monosExpanded, setMonosExpanded] = useState(false);
+  const [customLists, setCustomLists] = useState({});
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingList, setEditingList] = useState(null);
+
+  useEffect(() => {
+    setCustomLists(loadWordLists());
+  }, []);
+
+  const handleSaveList = (name, words) => {
+    saveWordList(name, words);
+    setCustomLists(loadWordLists());
+  };
+
+  const handleDeleteList = (name) => {
+    if (confirm(`¿Eliminar la lista "${name}"?`)) {
+      deleteWordList(name);
+      setCustomLists(loadWordLists());
+      // Remove from selected if it was selected
+      if (selectedThemes.includes(name)) {
+        onToggleTheme(name);
+      }
+    }
+  };
+
+  const handleEditList = (name) => {
+    setEditingList({ name, words: customLists[name] });
+    setModalOpen(true);
+  };
+
+  const handleOpenCreateModal = (e) => {
+    e.stopPropagation();
+    setEditingList(null);
+    setModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setEditingList(null);
+  };
 
   return (
     <div className="mb-6 space-y-4">
@@ -31,11 +72,23 @@ const GameSettingsSection = ({
               <span className="text-xs text-brand-wood/70 font-bold uppercase tracking-wide">{selectedThemes.length} seleccionados</span>
             </div>
           </div>
-          {themesExpanded ? <ChevronUp size={24} className="text-brand-wood" /> : <ChevronDown size={24} className="text-brand-wood" />}
+          <div className="flex items-center gap-2">
+            {isHost && (
+              <button
+                onClick={handleOpenCreateModal}
+                className="p-2 rounded-lg bg-brand-pastel-mint border-2 border-brand-wood text-brand-wood hover:brightness-95 transition-all shadow-[2px_2px_0px_0px_rgba(93,64,55,1)] active:translate-y-0.5 active:shadow-none"
+                title="Crear lista personalizada"
+              >
+                <Plus size={18} />
+              </button>
+            )}
+            {themesExpanded ? <ChevronUp size={24} className="text-brand-wood" /> : <ChevronDown size={24} className="text-brand-wood" />}
+          </div>
         </button>
         {themesExpanded && (
           <div className="mt-4 p-4 bg-brand-wood/5 rounded-2xl border-2 border-brand-wood/10 border-dashed">
             <div className="grid grid-cols-2 gap-3">
+              {/* Built-in themes */}
               {Object.keys(THEMES).map(theme => (
                 <button
                   key={theme}
@@ -48,6 +101,45 @@ const GameSettingsSection = ({
                 >
                   {theme}
                 </button>
+              ))}
+              {/* Custom lists */}
+              {Object.keys(customLists).map(listName => (
+                <div key={listName} className="relative">
+                  <button
+                    onClick={() => onToggleTheme(listName)}
+                    disabled={!isHost}
+                    className={`w-full p-3 rounded-xl font-bold capitalize transition-all border-2 ${selectedThemes.includes(listName)
+                      ? 'bg-brand-pastel-mint text-brand-wood border-brand-wood shadow-[2px_2px_0px_0px_rgba(93,64,55,1)]'
+                      : 'bg-white text-brand-wood border-brand-wood/20 hover:border-brand-wood/50'
+                      } ${!isHost ? 'cursor-not-allowed opacity-70' : ''}`}
+                  >
+                    {listName}
+                  </button>
+                  {isHost && (
+                    <div className="absolute top-1 right-1 flex gap-1">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditList(listName);
+                        }}
+                        className="p-1 rounded bg-white/90 border border-brand-wood/20 text-brand-wood hover:bg-brand-beige transition-all"
+                        title="Editar"
+                      >
+                        <Edit2 size={12} />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteList(listName);
+                        }}
+                        className="p-1 rounded bg-white/90 border border-brand-wood/20 text-brand-wood hover:bg-red-100 transition-all"
+                        title="Eliminar"
+                      >
+                        <X size={12} />
+                      </button>
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
             {!isHost && (
@@ -107,6 +199,14 @@ const GameSettingsSection = ({
           </div>
         )}
       </div>
+
+      {/* Word List Modal */}
+      <WordListModal
+        isOpen={modalOpen}
+        onClose={handleCloseModal}
+        onSave={handleSaveList}
+        existingList={editingList}
+      />
     </div>
   );
 };

@@ -45,22 +45,38 @@ const CreateGameForm = ({
 
       {/* Players Count */}
       <div className="space-y-2">
-        <label className="text-sm font-bold text-brand-wood uppercase tracking-wider ml-1">Cantidad de Jugadores</label>
+        <div className="flex items-center justify-between ml-1">
+          <label className="text-sm font-bold text-brand-wood uppercase tracking-wider">Cantidad de Jugadores</label>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={newGameSettings.players === 2}
+              onChange={(e) => setNewGameSettings(s => ({
+                ...s,
+                players: e.target.checked ? 2 : 3
+              }))}
+              className="w-4 h-4 accent-brand-bronze"
+            />
+            <span className="text-xs font-bold text-brand-wood/70">Ilimitados</span>
+          </label>
+        </div>
         <div className="flex items-center gap-4 bg-white p-2 rounded-2xl border-2 border-brand-wood/20">
           <button
             onClick={() => setNewGameSettings(s => ({ ...s, players: Math.max(3, s.players - 1) }))}
-            className="w-12 h-12 rounded-xl bg-brand-pastel-peach border-2 border-brand-wood text-brand-wood font-bold text-2xl hover:brightness-95 transition-all flex items-center justify-center shadow-[2px_2px_0px_0px_rgba(93,64,55,1)] active:translate-y-0.5 active:shadow-none"
-            disabled={newGameSettings.players <= 3}
+            className="w-12 h-12 rounded-xl bg-brand-pastel-peach border-2 border-brand-wood text-brand-wood font-bold text-2xl hover:brightness-95 transition-all flex items-center justify-center shadow-[2px_2px_0px_0px_rgba(93,64,55,1)] active:translate-y-0.5 active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={newGameSettings.players <= 3 || newGameSettings.players === 2}
           >
             -
           </button>
           <div className="flex-1 text-center">
-            <div className="text-3xl font-bold text-brand-wood">{newGameSettings.players}</div>
+            <div className="text-3xl font-bold text-brand-wood">
+              {newGameSettings.players === 2 ? '∞' : newGameSettings.players}
+            </div>
           </div>
           <button
             onClick={() => setNewGameSettings(s => ({ ...s, players: Math.min(20, s.players + 1) }))}
-            className="w-12 h-12 rounded-xl bg-brand-pastel-mint border-2 border-brand-wood text-brand-wood font-bold text-2xl hover:brightness-95 transition-all flex items-center justify-center shadow-[2px_2px_0px_0px_rgba(93,64,55,1)] active:translate-y-0.5 active:shadow-none"
-            disabled={newGameSettings.players >= 20}
+            className="w-12 h-12 rounded-xl bg-brand-pastel-mint border-2 border-brand-wood text-brand-wood font-bold text-2xl hover:brightness-95 transition-all flex items-center justify-center shadow-[2px_2px_0px_0px_rgba(93,64,55,1)] active:translate-y-0.5 active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={newGameSettings.players >= 20 || newGameSettings.players === 2}
           >
             +
           </button>

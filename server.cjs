@@ -12,6 +12,7 @@ const io = socketIO(server, {
 const path = require('path');
 const os = require('os');
 const { THEMES } = require('./src/data/gameData.json');
+const { isWordValid } = require('./utils/wordValidation.cjs');
 
 app.use(express.static(path.join(__dirname, 'dist')));
 
@@ -155,7 +156,7 @@ io.on('connection', (socket) => {
         return;
       }
 
-      if (room.players.length >= room.settings.players) {
+      if (room.players.length >= room.settings.players && room.settings.players !== 2) {
         socket.emit('error', 'Room is full');
         return;
       }
@@ -412,8 +413,8 @@ io.on('connection', (socket) => {
     if (room && room.gameData && room.gameData.state === 'mono_guessing') {
       const player = room.players.find(p => p.id === socket.id);
       if (player && room.gameData.monoIds.includes(player.playerId)) {
-        // Check guess
-        const correct = guess.trim().toLowerCase() === room.gameData.word.toLowerCase();
+        // Check guess with intelligent validation (typo tolerance + accent insensitivity)
+        const correct = isWordValid(guess, room.gameData.word);
         room.gameData.monoGuessResult = { guess, correct };
         room.gameData.state = 'results';
 
@@ -458,7 +459,7 @@ io.on('connection', (socket) => {
     const room = rooms[roomId.toUpperCase()];
     if (!room) {
       socket.emit('roomStatus', { exists: false, error: 'La sala no existe' });
-    } else if (room.players.length >= room.settings.players) {
+    } else if (room.players.length >= room.settings.players && room.settings.players !== 2) {
       socket.emit('roomStatus', { exists: true, full: true, error: 'La sala está llena' });
     } else {
       socket.emit('roomStatus', { exists: true, full: false, room: room });
