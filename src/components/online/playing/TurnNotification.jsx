@@ -1,5 +1,3 @@
-import React from 'react';
-
 const TurnNotification = ({ isMyTurn, gamePhase, gameType }) => {
   if (gamePhase === 'playing' && gameType === 'chat' && isMyTurn) {
     return (

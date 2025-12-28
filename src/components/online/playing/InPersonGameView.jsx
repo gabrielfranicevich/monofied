@@ -1,5 +1,3 @@
-import React from 'react';
-
 const InPersonGameView = ({ gameData, roomData, isHost, onReset }) => {
   return (
     <div className="flex-1 flex flex-col">

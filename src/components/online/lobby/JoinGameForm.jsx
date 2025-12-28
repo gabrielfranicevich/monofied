@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { Users, MessageSquare } from '../../Icons';
 
 const JoinGameForm = ({

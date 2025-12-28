@@ -1,14 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowLeft, Users } from '../Icons';
 import JoinGameForm from './lobby/JoinGameForm';
 import GameCodeInput from './lobby/GameCodeInput';
 import GameListSection from './lobby/GameListSection';
 
-const OnlineLobbyScreen = ({ setScreen, onlineGames = [], lanGames = [], onlineGamesExpanded, setOnlineGamesExpanded, joinOnlineGame, playerName, setPlayerName, roomIdFromUrl, clearRoomId, socket, getRandomName, localIp }) => {
+const OnlineLobbyScreen = ({ setScreen, onlineGames = [], lanGames = [],
+  joinOnlineGame, playerName,
+  setPlayerName, roomIdFromUrl, clearRoomId, socket, getRandomName, localIp }) => {
   const [roomStatus, setRoomStatus] = useState(null);
   const [checkingRoom, setCheckingRoom] = useState(false);
   const [selectedRoomId, setSelectedRoomId] = useState(null);
   const [lanGamesExpanded, setLanGamesExpanded] = useState(true);
+  const [onlineGamesExpanded, setOnlineGamesExpanded] = useState(true);
 
   const targetRoomId = roomIdFromUrl || selectedRoomId;
 
@@ -111,7 +114,6 @@ const OnlineLobbyScreen = ({ setScreen, onlineGames = [], lanGames = [], onlineG
               isExpanded={onlineGamesExpanded}
               onToggle={() => setOnlineGamesExpanded(!onlineGamesExpanded)}
               onJoin={setSelectedRoomId}
-              emptyMessage="No hay partidas encontradas..."
             />
           </div>
 

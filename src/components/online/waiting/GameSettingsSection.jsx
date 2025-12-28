@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ChevronDown, ChevronUp, Edit2, Eye } from '../../Icons';
 import { THEMES } from '../../../data/constants';
 

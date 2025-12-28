@@ -1,5 +1,3 @@
-import React from 'react';
-
 const ChatGameView = ({
   gameData,
   roomData,

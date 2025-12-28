@@ -66,8 +66,6 @@ function App() {
             setScreen={setScreen}
             onlineGames={onlineGame.onlineGames}
             lanGames={onlineGame.lanGames}
-            onlineGamesExpanded={true}
-            setOnlineGamesExpanded={() => { }}
             joinOnlineGame={onlineGame.joinOnlineGame}
             playerName={playerName}
             setPlayerName={setPlayerName}

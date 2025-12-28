@@ -1,5 +1,3 @@
-import React from 'react';
-
 const WordDisplay = ({ amIMono, word, gamePhase }) => {
   return (
     <div className="mb-4 p-4 bg-white rounded-2xl border-2 border-brand-wood text-center shadow-sm relative overflow-hidden">

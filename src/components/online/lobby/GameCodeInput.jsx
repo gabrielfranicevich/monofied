@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 const GameCodeInput = ({ onJoin }) => {
   const [code, setCode] = useState('');
@@ -15,16 +15,14 @@ const GameCodeInput = ({ onJoin }) => {
   };
 
   const handleJoin = () => {
-    if (code.length === 4) {
-      onJoin(code);
-    }
+    if (code.length === 4) onJoin(code);
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && code.length === 4) {
-      handleJoin();
-    }
+    if (e.key === 'Enter' && code.length === 4) handleJoin();
   };
+
+  // if (there are no joinable games) return null;
 
   return (
     <div className="mb-4">

@@ -1,4 +1,3 @@
-import React from 'react';
 import { Play } from '../../Icons';
 
 const StartGameButton = ({ isHost, onStart, playerCount }) => {

@@ -2,7 +2,9 @@ import React from 'react';
 import CreateGameHeader from './create/CreateGameHeader';
 import CreateGameForm from './create/CreateGameForm';
 
-const OnlineCreateScreen = ({ setScreen, newGameSettings, setNewGameSettings, onlineGames, setOnlineGames, playerNames, createOnlineGame, playerName, setPlayerName, getRandomName }) => {
+const OnlineCreateScreen = ({ setScreen, newGameSettings, setNewGameSettings,
+  onlineGames, setOnlineGames, playerNames, createOnlineGame,
+  playerName, setPlayerName, getRandomName }) => {
   const handleSubmit = () => {
     let finalName = playerName.trim();
     if (!finalName) {

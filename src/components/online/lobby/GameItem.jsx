@@ -1,4 +1,3 @@
-import React from 'react';
 import { Users, MessageSquare } from '../../Icons';
 
 const GameItem = ({ game, onJoin }) => {

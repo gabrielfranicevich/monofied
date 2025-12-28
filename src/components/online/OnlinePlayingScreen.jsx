@@ -8,7 +8,8 @@ import VotingView from './playing/VotingView';
 import MonoGuessingView from './playing/MonoGuessingView';
 import ResultsView from './playing/ResultsView';
 
-const OnlinePlayingScreen = ({ roomData, playerId, submitHint, submitVote, leaveRoom, isHost, resetGame, submitMonoGuess }) => {
+const OnlinePlayingScreen = ({ roomData, playerId, submitHint, submitVote,
+  leaveRoom, isHost, resetGame, submitMonoGuess }) => {
   const [hint, setHint] = useState('');
   const [selectedVotes, setSelectedVotes] = useState([]);
   const [monoGuess, setMonoGuess] = useState('');

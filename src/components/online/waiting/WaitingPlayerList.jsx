@@ -1,5 +1,3 @@
-import React from 'react';
-
 const WaitingPlayerList = ({ players, hostId }) => (
   <div className="flex-1 overflow-y-auto mb-6">
     <h3 className="text-sm font-bold text-brand-wood uppercase tracking-wider mb-3 ml-1">Jugadores</h3>

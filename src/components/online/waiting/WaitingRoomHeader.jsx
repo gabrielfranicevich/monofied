@@ -1,4 +1,3 @@
-import React, { useState } from 'react';
 import { ArrowLeft, Check, Copy } from '../../Icons';
 
 const WaitingRoomHeader = ({ roomName, roomId, onLeave }) => {
