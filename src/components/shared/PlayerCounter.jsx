@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import { memo } from 'react';
 import { Users, ChevronUp, ChevronDown } from '../Icons';
 
 const PlayerCounter = ({

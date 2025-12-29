@@ -1,4 +1,3 @@
-import React from 'react';
 import { Play, Users } from './Icons';
 
 const HomeScreen = ({ setScreen }) => (

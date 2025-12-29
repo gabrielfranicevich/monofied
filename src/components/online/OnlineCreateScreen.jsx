@@ -1,4 +1,3 @@
-import React from 'react';
 import CreateGameHeader from './create/CreateGameHeader';
 import CreateGameForm from './create/CreateGameForm';
 

@@ -1,6 +1,4 @@
 import { useState, useEffect } from 'react';
-import { ChevronDown, ChevronUp, Edit2, Eye, Plus, X } from '../../Icons';
-import { THEMES } from '../../../data/constants';
 import { loadWordLists, saveWordList, deleteWordList } from '../../../utils/customWordLists';
 import WordListModal from '../../shared/WordListModal';
 import ThemeSelector from '../../shared/ThemeSelector';

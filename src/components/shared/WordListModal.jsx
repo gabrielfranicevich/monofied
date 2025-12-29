@@ -1,21 +1,33 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import InputField from './InputField';
+import { parseWordListInput, formatWordListForInput } from '../../utils/textUtils';
 
 const WordListModal = ({ isOpen, onClose, onSave, existingList = null }) => {
   const [listName, setListName] = useState(existingList?.name || '');
   const [wordsInput, setWordsInput] = useState(
-    existingList?.words ? existingList.words.map(w => `"${w}"`).join(', ') : ''
+    existingList?.words ? formatWordListForInput(existingList.words) : ''
   );
   const [singleWord, setSingleWord] = useState('');
   const [errors, setErrors] = useState([]);
 
+  useEffect(() => {
+    if (isOpen) {
+      if (existingList) {
+        setListName(existingList.name);
+        setWordsInput(formatWordListForInput(existingList.words));
+      } else {
+        setListName('');
+        setWordsInput('');
+      }
+      setSingleWord('');
+      setErrors([]);
+    }
+  }, [isOpen, existingList]);
+
   if (!isOpen) return null;
 
   const parseWords = (input) => {
-    // Parse comma-separated quoted words: "w1", "w2", ...
-    const matches = input.match(/"([^"]+)"/g);
-    if (!matches) return [];
-    return matches.map(m => m.replace(/"/g, '').trim()).filter(w => w);
+    return parseWordListInput(input);
   };
 
   const handleSave = () => {
@@ -41,9 +53,7 @@ const WordListModal = ({ isOpen, onClose, onSave, existingList = null }) => {
 
   const handleAddWord = () => {
     if (singleWord.trim()) {
-      const currentWords = parseWords(wordsInput);
-      currentWords.push(singleWord.trim());
-      setWordsInput(currentWords.map(w => `"${w}"`).join(', '));
+      setWordsInput((prev) => (prev ? `${prev}, ${singleWord.trim()}` : singleWord.trim()));
       setSingleWord('');
     }
   };
@@ -89,12 +99,12 @@ const WordListModal = ({ isOpen, onClose, onSave, existingList = null }) => {
           <textarea
             value={wordsInput}
             onChange={(e) => setWordsInput(e.target.value)}
-            placeholder={`"perro", "gato", "león", ...`}
+            placeholder="perro, gato, león, ..."
             rows={4}
             className="w-full p-3 border-2 border-brand-wood/20 rounded-xl focus:border-brand-bronze focus:outline-none bg-white text-brand-wood placeholder-brand-wood/40 font-bold resize-none"
           />
           <div className="text-xs text-brand-wood/60 mt-1 ml-1">
-            Formato: "palabra1", "palabra2", "palabra3"
+            Formato: palabra1, palabra2, palabra3
           </div>
         </div>
 

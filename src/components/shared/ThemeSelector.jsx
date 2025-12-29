@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import { memo } from 'react';
 import { Edit2, ChevronUp, ChevronDown, Plus, X } from '../Icons';
 import { THEMES } from '../../data/constants';
 
@@ -46,20 +46,6 @@ const ThemeSelector = ({
     {expanded && (
       <div className="mt-4 p-4 bg-brand-wood/5 rounded-2xl border-2 border-brand-wood/10 border-dashed">
         <div className="grid grid-cols-2 gap-3">
-          {/* Built-in themes */}
-          {Object.keys(THEMES).map(theme => (
-            <button
-              key={theme}
-              onClick={() => onToggleTheme(theme)}
-              disabled={!isHost}
-              className={`p-3 rounded-xl font-bold capitalize transition-all border-2 ${selectedThemes.includes(theme)
-                ? 'bg-brand-bronze text-white border-brand-wood shadow-[2px_2px_0px_0px_rgba(93,64,55,1)]'
-                : 'bg-white text-brand-wood border-brand-wood/20 hover:border-brand-wood/50'
-                } ${!isHost ? 'cursor-not-allowed opacity-70' : ''}`}
-            >
-              {theme}
-            </button>
-          ))}
           {/* Custom lists */}
           {Object.keys(customLists).map(listName => (
             <div key={listName} className="relative">
@@ -98,6 +84,21 @@ const ThemeSelector = ({
                 </div>
               )}
             </div>
+          ))}
+
+          {/* Built-in themes */}
+          {Object.keys(THEMES).map(theme => (
+            <button
+              key={theme}
+              onClick={() => onToggleTheme(theme)}
+              disabled={!isHost}
+              className={`p-3 rounded-xl font-bold capitalize transition-all border-2 ${selectedThemes.includes(theme)
+                ? 'bg-brand-bronze text-white border-brand-wood shadow-[2px_2px_0px_0px_rgba(93,64,55,1)]'
+                : 'bg-white text-brand-wood border-brand-wood/20 hover:border-brand-wood/50'
+                } ${!isHost ? 'cursor-not-allowed opacity-70' : ''}`}
+            >
+              {theme}
+            </button>
           ))}
         </div>
         {!isHost && (

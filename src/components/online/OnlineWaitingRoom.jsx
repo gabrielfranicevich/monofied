@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import WaitingRoomHeader from './waiting/WaitingRoomHeader';
 import RoomStats from './waiting/RoomStats';
 import GameSettingsSection from './waiting/GameSettingsSection';
