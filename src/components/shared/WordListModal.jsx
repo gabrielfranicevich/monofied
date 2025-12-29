@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import InputField from './InputField';
 
 const WordListModal = ({ isOpen, onClose, onSave, existingList = null }) => {
   const [listName, setListName] = useState(existingList?.name || '');
@@ -72,18 +73,13 @@ const WordListModal = ({ isOpen, onClose, onSave, existingList = null }) => {
         )}
 
         {/* List Name */}
-        <div className="mb-4">
-          <label className="text-sm font-bold text-brand-wood uppercase tracking-wider ml-1 block mb-2">
-            Nombre de la Lista
-          </label>
-          <input
-            type="text"
-            value={listName}
-            onChange={(e) => setListName(e.target.value)}
-            placeholder="Ej: Animales, Países, etc."
-            className="w-full p-3 border-2 border-brand-wood/20 rounded-xl focus:border-brand-bronze focus:outline-none bg-white text-brand-wood placeholder-brand-wood/40 font-bold"
-          />
-        </div>
+        <InputField
+          label="Nombre de la Lista"
+          value={listName}
+          onChange={(e) => setListName(e.target.value)}
+          placeholder="Ej: Animales, Países, etc."
+          containerClassName="mb-4"
+        />
 
         {/* Words Input */}
         <div className="mb-4">
@@ -108,14 +104,15 @@ const WordListModal = ({ isOpen, onClose, onSave, existingList = null }) => {
             Agregar Palabra Individual
           </label>
           <div className="flex gap-2">
-            <input
-              type="text"
-              value={singleWord}
-              onChange={(e) => setSingleWord(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleAddWord()}
-              placeholder="Escribe una palabra"
-              className="flex-1 p-3 border-2 border-brand-wood/20 rounded-xl focus:border-brand-bronze focus:outline-none bg-white text-brand-wood placeholder-brand-wood/40 font-bold"
-            />
+            <div className="flex-1">
+              <InputField
+                value={singleWord}
+                onChange={(e) => setSingleWord(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddWord()}
+                placeholder="Escribe una palabra"
+                containerClassName="space-y-0"
+              />
+            </div>
             <button
               onClick={handleAddWord}
               className="px-4 py-3 bg-brand-pastel-mint border-2 border-brand-wood text-brand-wood font-bold rounded-xl hover:brightness-95 transition-all shadow-[2px_2px_0px_0px_rgba(93,64,55,1)] active:translate-y-0.5 active:shadow-none"

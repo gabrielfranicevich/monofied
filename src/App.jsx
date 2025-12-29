@@ -140,6 +140,15 @@ function App() {
             namesExpanded={offlineGame.namesExpanded}
             setNamesExpanded={offlineGame.setNamesExpanded}
             startGame={offlineGame.startGame}
+            // New Custom List Props
+            customLists={offlineGame.customLists}
+            onSaveList={offlineGame.handleSaveList}
+            onDeleteList={offlineGame.handleDeleteList}
+            onEditList={offlineGame.handleEditList}
+            onOpenCreateModal={offlineGame.handleOpenCreateModal}
+            modalOpen={offlineGame.modalOpen}
+            onCloseModal={offlineGame.handleCloseModal}
+            editingList={offlineGame.editingList}
           />
         )}
 

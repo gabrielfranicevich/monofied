@@ -7,7 +7,9 @@ export const useAppRouting = (screen, setScreen, roomId, setRoomId, roomData) =>
       const path = window.location.pathname.substring(1);
       const pathUpper = path.toUpperCase();
 
-      if (path === 'online') {
+      if (path === 'offline') {
+        setScreen('setup');
+      } else if (path === 'online') {
         setScreen('online_lobby');
         if (setRoomId) setRoomId(null);
       } else if (pathUpper && pathUpper.length === 4) {
@@ -26,7 +28,9 @@ export const useAppRouting = (screen, setScreen, roomId, setRoomId, roomData) =>
     // App.jsx ran this logic on mount manually.
     const path = window.location.pathname.substring(1);
     const pathUpper = path.toUpperCase();
-    if (path === 'online') {
+    if (path === 'offline') {
+      setScreen('setup');
+    } else if (path === 'online') {
       setScreen('online_lobby');
     } else if (pathUpper && pathUpper.length === 4) {
       if (setRoomId) setRoomId(pathUpper);
@@ -42,7 +46,15 @@ export const useAppRouting = (screen, setScreen, roomId, setRoomId, roomData) =>
 
   // Update URL based on state
   useEffect(() => {
-    if ((screen === 'online_waiting' || screen === 'online_playing') && roomData?.id) {
+    // Offline screens
+    if (screen === 'setup' || screen === 'reveal' || screen === 'playing') {
+      const currentPath = window.location.pathname.substring(1);
+      if (currentPath !== 'offline') {
+        window.history.pushState(null, '', '/offline');
+      }
+    }
+    // Online screens
+    else if ((screen === 'online_waiting' || screen === 'online_playing') && roomData?.id) {
       const currentPath = window.location.pathname.substring(1);
       if (currentPath !== roomData.id) {
         window.history.pushState(null, '', `/${roomData.id}`);

@@ -1,4 +1,7 @@
 import { MessageSquare, Users } from '../../Icons';
+import InputField from '../../shared/InputField';
+import PlayerCounter from '../../shared/PlayerCounter'; // Will be created next step, but might as well import if I do it in parallel. Wait, I haven't created PlayerCounter yet. I should wait.
+// Actually, I'll stick to InputField only for this step.
 
 const CreateGameForm = ({
   playerName,
@@ -17,31 +20,25 @@ const CreateGameForm = ({
   return (
     <div className="flex-1 overflow-y-auto space-y-6 pr-2">
       {/* Host Name */}
-      <div className="space-y-2">
-        <label className="text-sm font-bold text-brand-wood uppercase tracking-wider ml-1">Tu Nombre</label>
-        <input
-          type="text"
-          value={playerName}
-          onChange={(e) => setPlayerName(e.target.value)}
-          placeholder="Tu nombre (Host)"
-          autoFocus
-          onKeyDown={handleKeyDown}
-          className="w-full p-4 border-2 border-brand-wood/20 rounded-2xl focus:border-brand-bronze focus:outline-none bg-white text-brand-wood placeholder-brand-wood/40 font-bold text-lg"
-        />
-      </div>
+      <InputField
+        label="Tu Nombre"
+        value={playerName}
+        onChange={(e) => setPlayerName(e.target.value)}
+        placeholder="Tu nombre (Host)"
+        autoFocus
+        onKeyDown={handleKeyDown}
+        className="p-4 rounded-2xl text-lg" // Custom large style
+      />
 
       {/* Game Name */}
-      <div className="space-y-2">
-        <label className="text-sm font-bold text-brand-wood uppercase tracking-wider ml-1">Nombre de la Partida</label>
-        <input
-          type="text"
-          value={newGameSettings.name}
-          onChange={(e) => setNewGameSettings({ ...newGameSettings, name: e.target.value })}
-          placeholder="Ej: Papus :v"
-          onKeyDown={handleKeyDown}
-          className="w-full p-4 border-2 border-brand-wood/20 rounded-2xl focus:border-brand-bronze focus:outline-none bg-white text-brand-wood placeholder-brand-wood/40 font-bold text-lg"
-        />
-      </div>
+      <InputField
+        label="Nombre de la Partida"
+        value={newGameSettings.name}
+        onChange={(e) => setNewGameSettings({ ...newGameSettings, name: e.target.value })}
+        placeholder="Ej: Papus :v"
+        onKeyDown={handleKeyDown}
+        className="p-4 rounded-2xl text-lg" // Custom large style
+      />
 
       {/* Players Count */}
       <div className="space-y-2">
@@ -60,27 +57,14 @@ const CreateGameForm = ({
             <span className="text-xs font-bold text-brand-wood/70">Ilimitados</span>
           </label>
         </div>
-        <div className="flex items-center gap-4 bg-white p-2 rounded-2xl border-2 border-brand-wood/20">
-          <button
-            onClick={() => setNewGameSettings(s => ({ ...s, players: Math.max(3, s.players - 1) }))}
-            className="w-12 h-12 rounded-xl bg-brand-pastel-peach border-2 border-brand-wood text-brand-wood font-bold text-2xl hover:brightness-95 transition-all flex items-center justify-center shadow-[2px_2px_0px_0px_rgba(93,64,55,1)] active:translate-y-0.5 active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={newGameSettings.players <= 3 || newGameSettings.players === 2}
-          >
-            -
-          </button>
-          <div className="flex-1 text-center">
-            <div className="text-3xl font-bold text-brand-wood">
-              {newGameSettings.players === 2 ? '∞' : newGameSettings.players}
-            </div>
-          </div>
-          <button
-            onClick={() => setNewGameSettings(s => ({ ...s, players: Math.min(20, s.players + 1) }))}
-            className="w-12 h-12 rounded-xl bg-brand-pastel-mint border-2 border-brand-wood text-brand-wood font-bold text-2xl hover:brightness-95 transition-all flex items-center justify-center shadow-[2px_2px_0px_0px_rgba(93,64,55,1)] active:translate-y-0.5 active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={newGameSettings.players >= 20 || newGameSettings.players === 2}
-          >
-            +
-          </button>
-        </div>
+        <PlayerCounter
+          count={newGameSettings.players === 2 ? '∞' : newGameSettings.players}
+          onIncrement={() => setNewGameSettings(s => ({ ...s, players: Math.min(20, s.players + 1) }))}
+          onDecrement={() => setNewGameSettings(s => ({ ...s, players: Math.max(3, s.players - 1) }))}
+          min={3}
+          max={20}
+          accordion={false}
+        />
       </div>
 
       {/* Game Type */}

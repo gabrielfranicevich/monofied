@@ -1,5 +1,6 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { THEMES, SUSTANTIVOS, ADJETIVOS } from '../data/constants';
+import { loadWordLists, saveWordList, deleteWordList } from '../utils/customWordLists';
 
 export const useOfflineGame = (setScreen) => {
   // Game Setup State
@@ -7,6 +8,15 @@ export const useOfflineGame = (setScreen) => {
   const [numPlayers, setNumPlayers] = useState(3);
   const [numMonos, setNumMonos] = useState(1);
   const [playerNames, setPlayerNames] = useState(['', '', '']);
+
+  // Custom Themes State
+  const [customLists, setCustomLists] = useState({});
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingList, setEditingList] = useState(null);
+
+  useEffect(() => {
+    setCustomLists(loadWordLists());
+  }, []);
 
   // UI State
   const [themesExpanded, setThemesExpanded] = useState(false);
@@ -34,6 +44,8 @@ export const useOfflineGame = (setScreen) => {
       }
     });
   }, []);
+
+  // ... (keeping existing handlers like updatePlayerName, getRandomName, etc.)
 
   const updatePlayerName = useCallback((index, name) => {
     setPlayerNames(prev => {
@@ -89,8 +101,55 @@ export const useOfflineGame = (setScreen) => {
     }
   }, [numMonos]);
 
+  // Custom List Handlers
+  const handleSaveList = useCallback((name, words) => {
+    saveWordList(name, words);
+    setCustomLists(loadWordLists());
+  }, []);
+
+  const handleDeleteList = useCallback((name) => {
+    if (confirm(`¿Eliminar la lista "${name}"?`)) {
+      deleteWordList(name);
+      setCustomLists(loadWordLists());
+      if (selectedThemes.includes(name)) {
+        toggleTheme(name);
+      }
+    }
+  }, [selectedThemes, toggleTheme]);
+
+  const handleEditList = useCallback((name) => {
+    setEditingList({ name, words: customLists[name] });
+    setModalOpen(true);
+  }, [customLists]);
+
+  const handleOpenCreateModal = useCallback((e) => {
+    e.stopPropagation();
+    setEditingList(null);
+    setModalOpen(true);
+  }, []);
+
+  const handleCloseModal = useCallback(() => {
+    setModalOpen(false);
+    setEditingList(null);
+  }, []);
+
+
   const startGame = useCallback(() => {
-    const allWords = [...new Set(selectedThemes.flatMap(theme => THEMES[theme]))];
+    // Merge standard themes and custom list words
+    const allWords = [...new Set(selectedThemes.flatMap(theme => {
+      // Check if it's a standard theme
+      if (THEMES[theme]) return THEMES[theme];
+      // Check if it's a custom list
+      if (customLists[theme]) return customLists[theme];
+      return [];
+    }))];
+
+    // Fallback if no words found (shouldn't happen with valid UI)
+    if (allWords.length === 0) {
+      alert("No hay palabras en los temas seleccionados");
+      return;
+    }
+
     const selectedWord = allWords[Math.floor(Math.random() * allWords.length)];
 
     const finalPlayerNames = playerNames.slice(0, numPlayers).map((name, i) =>
@@ -120,7 +179,7 @@ export const useOfflineGame = (setScreen) => {
     setCurrentPlayerIndex(0);
     setWordRevealed(false);
     setScreen('reveal');
-  }, [selectedThemes, playerNames, numPlayers, numMonos, setScreen]);
+  }, [selectedThemes, playerNames, numPlayers, numMonos, setScreen, customLists]);
 
   const showWord = useCallback(() => {
     setWordRevealed(true);
@@ -169,6 +228,9 @@ export const useOfflineGame = (setScreen) => {
     allPlayersExpanded,
     rulesExpanded,
     isMono,
+    customLists,
+    modalOpen,
+    editingList,
 
     // Setters (for UI toggles mostly)
     setThemesExpanded,
@@ -191,6 +253,11 @@ export const useOfflineGame = (setScreen) => {
     showWord,
     nextPlayer,
     resetGame,
-    getRandomName
+    getRandomName,
+    handleSaveList,
+    handleDeleteList,
+    handleEditList,
+    handleOpenCreateModal,
+    handleCloseModal
   };
 };
