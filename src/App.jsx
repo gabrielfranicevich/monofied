@@ -130,6 +130,7 @@ function App() {
             playersExpanded={offlineGame.playersExpanded}
             setPlayersExpanded={offlineGame.setPlayersExpanded}
             numMonos={offlineGame.numMonos}
+            maxMonos={offlineGame.maxMonos}
             addMono={offlineGame.addMono}
             removeMono={offlineGame.removeMono}
             monosExpanded={offlineGame.monosExpanded}

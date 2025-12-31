@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { ArrowLeft, Edit2, ChevronUp, ChevronDown, Users, Eye, Play } from './Icons';
+import { ArrowLeft, Edit2, ChevronUp, ChevronDown, Play } from './Icons';
 import { THEMES } from '../data/constants';
 
 import ThemeSelector from './shared/ThemeSelector';

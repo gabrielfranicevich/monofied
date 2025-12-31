@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { THEMES, SUSTANTIVOS, ADJETIVOS } from '../data/constants';
 import { loadWordLists, saveWordList, deleteWordList } from '../utils/customWordLists';
+import { calculateMaxMonos } from '../utils/gameLogic';
 
 export const useOfflineGame = (setScreen) => {
   // Game Setup State
@@ -8,6 +9,9 @@ export const useOfflineGame = (setScreen) => {
   const [numPlayers, setNumPlayers] = useState(3);
   const [numMonos, setNumMonos] = useState(1);
   const [playerNames, setPlayerNames] = useState(['', '', '']);
+
+  // Derived State
+  const maxMonos = calculateMaxMonos(numPlayers);
 
   // Custom Themes State
   const [customLists, setCustomLists] = useState({});
@@ -70,9 +74,11 @@ export const useOfflineGame = (setScreen) => {
     const newNumPlayers = numPlayers + 1;
     setNumPlayers(newNumPlayers);
     setPlayerNames(prev => [...prev, '']);
-    const maxMonos = Math.ceil(newNumPlayers / 2) - 1;
-    if (numMonos > maxMonos) {
-      setNumMonos(maxMonos);
+
+    // Check if current monos exceed new max (though adding players usually increases max)
+    const newMaxMonos = calculateMaxMonos(newNumPlayers);
+    if (numMonos > newMaxMonos) {
+      setNumMonos(newMaxMonos);
     }
   }, [numPlayers, numMonos]);
 
@@ -81,19 +87,19 @@ export const useOfflineGame = (setScreen) => {
       const newNumPlayers = numPlayers - 1;
       setNumPlayers(newNumPlayers);
       setPlayerNames(prev => prev.slice(0, -1));
-      const maxMonos = Math.ceil(newNumPlayers / 2) - 1;
-      if (numMonos > maxMonos) {
-        setNumMonos(maxMonos);
+
+      const newMaxMonos = calculateMaxMonos(newNumPlayers);
+      if (numMonos > newMaxMonos) {
+        setNumMonos(newMaxMonos);
       }
     }
   }, [numPlayers, numMonos]);
 
   const addMono = useCallback(() => {
-    const maxMonos = Math.ceil(numPlayers / 2) - 1;
     if (numMonos < maxMonos) {
       setNumMonos(numMonos + 1);
     }
-  }, [numPlayers, numMonos]);
+  }, [numPlayers, numMonos, maxMonos]);
 
   const removeMono = useCallback(() => {
     if (numMonos > 1) {
@@ -216,6 +222,7 @@ export const useOfflineGame = (setScreen) => {
     selectedThemes,
     numPlayers,
     numMonos,
+    maxMonos,
     playerNames,
     currentPlayerIndex,
     gameData,
