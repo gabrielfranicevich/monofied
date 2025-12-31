@@ -1,3 +1,4 @@
+import { calculateMaxMonos } from '../../utils/gameLogic';
 import { useEffect } from 'react';
 import WaitingRoomHeader from './waiting/WaitingRoomHeader';
 import RoomStats from './waiting/RoomStats';
@@ -9,9 +10,8 @@ const OnlineWaitingRoom = ({ roomData, isHost, leaveRoom, startGame, updateRoomS
   const selectedThemes = roomData.settings.selectedThemes || ['básico'];
   const numMonos = roomData.settings.numMonos || 1;
   const currentPlayers = roomData.players.length;
-  // Same logic as SetupScreen: Max monos is ceil(players / 2) - 1
-  // e.g. 3 players -> 1 mono. 4 players -> 1 mono. 5 players -> 2 monos.
-  const maxMonos = Math.max(1, Math.ceil(currentPlayers / 2) - 1);
+
+  const maxMonos = calculateMaxMonos(currentPlayers);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -47,8 +47,9 @@ const OnlineWaitingRoom = ({ roomData, isHost, leaveRoom, startGame, updateRoomS
 
   const addMono = () => {
     if (!isHost) return;
-    if (numMonos < maxMonos) {
-      updateRoomSettings({ numMonos: numMonos + 1 });
+    const currentNum = Number(numMonos);
+    if (currentNum < maxMonos) {
+      updateRoomSettings({ numMonos: currentNum + 1 });
     }
   };
 

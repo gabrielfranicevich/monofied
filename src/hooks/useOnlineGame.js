@@ -8,8 +8,10 @@ export const useOnlineGame = (setScreen, mySessionId, localIp, playerName) => {
   const [onlineGames, setOnlineGames] = useState([]);
   const [lanGames, setLanGames] = useState([]);
   const [roomId, setRoomId] = useState(null);
-  const [isHost, setIsHost] = useState(false);
   const [roomData, setRoomData] = useState(null);
+
+  // Derived State
+  const isHost = roomData?.hostPlayerId === mySessionId;
 
   // Creation Settings
   const [newGameSettings, setNewGameSettings] = useState({
@@ -42,7 +44,6 @@ export const useOnlineGame = (setScreen, mySessionId, localIp, playerName) => {
     newSocket.on('roomCreated', (room) => {
       console.log('Room created:', room);
       setRoomId(room.id);
-      setIsHost(true);
       setRoomData(room);
       setScreen('online_waiting');
     });
@@ -59,7 +60,6 @@ export const useOnlineGame = (setScreen, mySessionId, localIp, playerName) => {
     newSocket.on('roomJoined', (room) => {
       console.log('Joined room:', room);
       setRoomId(room.id);
-      setIsHost(false);
       setRoomData(room);
       setScreen('online_waiting');
     });
@@ -97,9 +97,9 @@ export const useOnlineGame = (setScreen, mySessionId, localIp, playerName) => {
     newSocket.on('roomClosed', ({ message }) => {
       console.log('Room closed:', message);
       alert(message);
+      alert(message);
       setRoomData(null);
       setRoomId(null);
-      setIsHost(false);
       setScreen('online_lobby');
     });
 
@@ -157,7 +157,6 @@ export const useOnlineGame = (setScreen, mySessionId, localIp, playerName) => {
     }
     setRoomData(null);
     setRoomId(null);
-    setIsHost(false);
     setScreen('online_lobby');
     localStorage.removeItem('lastRoomId');
     window.history.pushState(null, '', '/online');
@@ -211,7 +210,6 @@ export const useOnlineGame = (setScreen, mySessionId, localIp, playerName) => {
     roomId,
     setRoomId,
     isHost,
-    setIsHost,
     roomData,
     setRoomData,
     newGameSettings,

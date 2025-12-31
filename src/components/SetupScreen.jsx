@@ -112,8 +112,8 @@ const SetupScreen = ({
 
     <MonoCounter
       numMonos={numMonos}
-      addMono={addMono}
-      removeMono={removeMono}
+      onAddMono={addMono}
+      onRemoveMono={removeMono}
       maxMonos={maxMonos}
       expanded={monosExpanded}
       setExpanded={setMonosExpanded}
