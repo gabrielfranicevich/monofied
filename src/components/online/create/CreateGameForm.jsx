@@ -59,10 +59,9 @@ const CreateGameForm = ({
         </div>
         <PlayerCounter
           count={newGameSettings.players === 2 ? '∞' : newGameSettings.players}
-          onIncrement={() => setNewGameSettings(s => ({ ...s, players: Math.min(20, s.players + 1) }))}
+          onIncrement={() => setNewGameSettings(s => ({ ...s, players: s.players + 1 }))}
           onDecrement={() => setNewGameSettings(s => ({ ...s, players: Math.max(3, s.players - 1) }))}
           min={3}
-          max={20}
           accordion={false}
         />
       </div>

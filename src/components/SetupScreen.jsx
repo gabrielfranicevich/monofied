@@ -106,8 +106,7 @@ const SetupScreen = ({
       expanded={playersExpanded}
       onToggleExpand={() => setPlayersExpanded(!playersExpanded)}
       min={3}
-      max={100}
-      showMax={true}
+      showMax={false}
     />
 
     <MonoCounter
