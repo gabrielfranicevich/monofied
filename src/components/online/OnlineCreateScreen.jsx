@@ -1,5 +1,6 @@
 import CreateGameHeader from './create/CreateGameHeader';
 import CreateGameForm from './create/CreateGameForm';
+import SlidingToggle from '../shared/SlidingToggle';
 
 const OnlineCreateScreen = ({ setScreen, newGameSettings, setNewGameSettings,
   onlineGames, setOnlineGames, playerNames, createOnlineGame,
@@ -30,7 +31,19 @@ const OnlineCreateScreen = ({ setScreen, newGameSettings, setNewGameSettings,
 
   return (
     <div className="p-6 relative z-10 h-full flex flex-col">
-      <CreateGameHeader onBack={() => setScreen('online_lobby')} />
+      <CreateGameHeader
+        onBack={() => setScreen('online_lobby')}
+        toggleSlot={
+          <SlidingToggle
+            value={newGameSettings.isPrivate || false}
+            onChange={(val) => setNewGameSettings({ ...newGameSettings, isPrivate: val })}
+            leftLabel="Pública"
+            rightLabel="Privada"
+            leftValue={false}
+            rightValue={true}
+          />
+        }
+      />
 
       <CreateGameForm
         playerName={playerName}

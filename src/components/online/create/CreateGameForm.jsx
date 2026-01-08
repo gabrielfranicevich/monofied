@@ -1,7 +1,6 @@
 import { MessageSquare, Users } from '../../Icons';
 import InputField from '../../shared/InputField';
-import PlayerCounter from '../../shared/PlayerCounter'; // Will be created next step, but might as well import if I do it in parallel. Wait, I haven't created PlayerCounter yet. I should wait.
-// Actually, I'll stick to InputField only for this step.
+import PlayerCounter from '../../shared/PlayerCounter';
 
 const CreateGameForm = ({
   playerName,

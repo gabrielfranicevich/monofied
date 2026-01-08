@@ -6,8 +6,19 @@ const WaitingRoomHeader = ({ roomName, roomId, onLeave }) => {
 
   const copyGameCode = async () => {
     try {
-      await navigator.clipboard.writeText(roomId);
-      setCopied(true);
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(roomId);
+        setCopied(true);
+      } else {
+        // Fallback for non-secure contexts (http on LAN)
+        const textArea = document.createElement("textarea");
+        textArea.value = roomId;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+        setCopied(true);
+      }
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error('Failed to copy:', err);

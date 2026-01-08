@@ -21,6 +21,7 @@ function setupRoomHandlers(io, socket, rooms, broadcastRoomList, broadcastRoomUp
       creatorPublicIp: clientIp,
       creatorLocalIp: localIp || null,
       contributedThemes: [],
+      isPrivate: settings?.isPrivate || false,
       settings: {
         players: Number(settings?.players) || 2,
         type: settings?.type || 'in_person',

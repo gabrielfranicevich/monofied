@@ -42,14 +42,16 @@ const rooms = {};
 
 // Helper functions available to all handlers
 function broadcastRoomList() {
-  const roomList = Object.values(rooms).map(r => ({
-    id: r.id,
-    name: r.roomName || r.players[0].name + "'s Game",
-    players: r.players.length,
-    maxPlayers: r.settings.players,
-    type: r.settings.type,
-    status: r.status
-  }));
+  const roomList = Object.values(rooms)
+    .filter(r => !r.isPrivate) // Only show public rooms
+    .map(r => ({
+      id: r.id,
+      name: r.roomName || r.players[0].name + "'s Game",
+      players: r.players.length,
+      maxPlayers: r.settings.players,
+      type: r.settings.type,
+      status: r.status
+    }));
   io.emit('roomList', roomList);
 }
 

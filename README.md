@@ -82,7 +82,7 @@ El juego acepta variaciones de la palabra secreta:
 - **Ignora acentos**: "café" = "cafe"
 - **Tolerancia de errores tipográficos**: Acepta palabras con pequeños errores tipográficos
 
-### 🔐 Salas Privadas Online - to do
+### 🔐 Salas Privadas Online
 
 - Crea salas con códigos de 4 letras únicos
 - Solo quienes tengan el código pueden unirse
@@ -128,4 +128,3 @@ El juego acepta variaciones de la palabra secreta:
 ## 🌐 Jugar Online
 
 Visita [mono-bjiz.onrender.com](https://mono-bjiz.onrender.com/) para jugar directamente sin instalar nada.
-

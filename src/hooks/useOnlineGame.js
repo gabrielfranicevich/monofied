@@ -124,7 +124,8 @@ export const useOnlineGame = (setScreen, mySessionId, localIp, playerName) => {
         roomName: newGameSettings.name,
         settings: {
           players: newGameSettings.players,
-          type: newGameSettings.type
+          type: newGameSettings.type,
+          isPrivate: newGameSettings.isPrivate
         },
         playerId: mySessionId,
         localIp: localIp
