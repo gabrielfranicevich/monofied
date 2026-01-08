@@ -9,6 +9,7 @@ const ThemeSelector = ({
   setExpanded,
   isHost = true,
   customLists = {},
+  contributedThemes = [],
   onOpenCreateModal,
   onEditList,
   onDeleteList
@@ -28,14 +29,14 @@ const ThemeSelector = ({
         </div>
       </div>
       <div className="flex items-center gap-2">
-        {onOpenCreateModal && isHost && (
+        {onOpenCreateModal && (
           <div
             onClick={(e) => {
               e.stopPropagation();
               onOpenCreateModal(e);
             }}
             className="p-2 rounded-lg bg-brand-pastel-mint border-2 border-brand-wood text-brand-wood hover:brightness-95 transition-all shadow-[2px_2px_0px_0px_rgba(93,64,55,1)] active:translate-y-0.5 active:shadow-none cursor-pointer"
-            title="Crear lista personalizada"
+            title={isHost ? "Crear lista personalizada" : "Contribuir temas"}
           >
             <Plus size={18} />
           </div>
@@ -86,7 +87,38 @@ const ThemeSelector = ({
             </div>
           ))}
 
+          {/* Contributed themes */}
+          {contributedThemes.length > 0 && (
+            <>
+              <div className="col-span-2 mt-2 mb-1">
+                <div className="h-px bg-brand-wood/20"></div>
+                <p className="text-xs text-brand-wood/60 font-bold uppercase tracking-wide mt-2">Aportados por jugadores</p>
+              </div>
+              {contributedThemes.map((theme, idx) => (
+                <div key={`${theme.name}-${theme.contributorId}-${idx}`} className="relative">
+                  <button
+                    onClick={() => onToggleTheme(`contributed:${theme.name}:${theme.contributorId}`)}
+                    disabled={!isHost}
+                    className={`w-full p-3 rounded-xl font-bold capitalize transition-all border-2 ${selectedThemes.includes(`contributed:${theme.name}:${theme.contributorId}`)
+                      ? 'bg-brand-pastel-mint text-brand-wood border-brand-wood shadow-[2px_2px_0px_0px_rgba(93,64,55,1)]'
+                      : 'bg-white text-brand-wood border-brand-wood/20 hover:border-brand-wood/50'
+                      } ${!isHost ? 'cursor-not-allowed opacity-70' : ''}`}
+                  >
+                    <div className="text-left">
+                      <div>{theme.name}</div>
+                      <div className="text-xs opacity-60 normal-case font-normal">por {theme.contributorName}</div>
+                    </div>
+                  </button>
+                </div>
+              ))}
+            </>
+          )}
+
           {/* Built-in themes */}
+          <div className="col-span-2 mt-2 mb-1">
+            <div className="h-px bg-brand-wood/20"></div>
+            <p className="text-xs text-brand-wood/60 font-bold uppercase tracking-wide mt-2">Temas integrados</p>
+          </div>
           {Object.keys(THEMES).map(theme => (
             <button
               key={theme}
@@ -103,7 +135,7 @@ const ThemeSelector = ({
         </div>
         {!isHost && (
           <div className="text-center text-xs text-brand-wood/60 font-bold mt-3 italic">
-            Solo el anfitrión puede cambiar los temas
+            Solo el anfitrión puede seleccionar temas. Usa el botón + para contribuir tus temas.
           </div>
         )}
       </div>

@@ -20,6 +20,7 @@ function setupRoomHandlers(io, socket, rooms, broadcastRoomList, broadcastRoomUp
       status: 'waiting',
       creatorPublicIp: clientIp,
       creatorLocalIp: localIp || null,
+      contributedThemes: [],
       settings: {
         players: Number(settings?.players) || 2,
         type: settings?.type || 'in_person',
@@ -97,6 +98,43 @@ function setupRoomHandlers(io, socket, rooms, broadcastRoomList, broadcastRoomUp
       room.settings = { ...room.settings, ...settings };
       broadcastRoomUpdate(roomId);
       broadcastRoomList();
+    }
+  });
+
+  socket.on('contributeTheme', ({ roomId, themes }) => {
+    const room = rooms[roomId];
+    if (room) {
+      const player = room.players.find(p => p.id === socket.id);
+      if (player) {
+        // Add each theme with contributor information
+        themes.forEach(theme => {
+          // Check if this theme name already exists from this contributor
+          const existingIndex = room.contributedThemes.findIndex(
+            t => t.name === theme.name && t.contributorId === player.playerId
+          );
+
+          if (existingIndex >= 0) {
+            // Update existing theme
+            room.contributedThemes[existingIndex] = {
+              name: theme.name,
+              words: theme.words,
+              contributorId: player.playerId,
+              contributorName: player.name
+            };
+          } else {
+            // Add new theme
+            room.contributedThemes.push({
+              name: theme.name,
+              words: theme.words,
+              contributorId: player.playerId,
+              contributorName: player.name
+            });
+          }
+        });
+
+        broadcastRoomUpdate(roomId);
+        console.log(`${player.name} contributed ${themes.length} theme(s) to room ${roomId}`);
+      }
     }
   });
 

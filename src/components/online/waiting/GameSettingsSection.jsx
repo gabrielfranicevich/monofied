@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { loadWordLists, saveWordList, deleteWordList } from '../../../utils/customWordLists';
 import WordListModal from '../../shared/WordListModal';
+import ContributeThemeModal from '../../shared/ContributeThemeModal';
 import ThemeSelector from '../../shared/ThemeSelector';
 import MonoCounter from '../../shared/MonoCounter';
 
@@ -11,12 +12,15 @@ const GameSettingsSection = ({
   numMonos,
   maxMonos,
   onAddMono,
-  onRemoveMono
+  onRemoveMono,
+  contributedThemes = [],
+  onContributeTheme
 }) => {
   const [themesExpanded, setThemesExpanded] = useState(false);
   const [monosExpanded, setMonosExpanded] = useState(false);
   const [customLists, setCustomLists] = useState({});
   const [modalOpen, setModalOpen] = useState(false);
+  const [contributeModalOpen, setContributeModalOpen] = useState(false);
   const [editingList, setEditingList] = useState(null);
 
   useEffect(() => {
@@ -46,13 +50,25 @@ const GameSettingsSection = ({
 
   const handleOpenCreateModal = (e) => {
     e.stopPropagation();
-    setEditingList(null);
-    setModalOpen(true);
+    if (isHost) {
+      // Host: open WordListModal to create/manage personal lists
+      setEditingList(null);
+      setModalOpen(true);
+    } else {
+      // Non-host: open ContributeThemeModal to share themes
+      setContributeModalOpen(true);
+    }
   };
 
   const handleCloseModal = () => {
     setModalOpen(false);
     setEditingList(null);
+  };
+
+  const handleContributeThemes = (themes) => {
+    if (onContributeTheme) {
+      onContributeTheme(themes);
+    }
   };
 
   return (
@@ -65,6 +81,7 @@ const GameSettingsSection = ({
         setExpanded={setThemesExpanded}
         isHost={isHost}
         customLists={customLists}
+        contributedThemes={contributedThemes}
         onOpenCreateModal={handleOpenCreateModal}
         onEditList={handleEditList}
         onDeleteList={handleDeleteList}
@@ -81,12 +98,19 @@ const GameSettingsSection = ({
         isHost={isHost}
       />
 
-      {/* Word List Modal */}
+      {/* Word List Modal - for host only */}
       <WordListModal
         isOpen={modalOpen}
         onClose={handleCloseModal}
         onSave={handleSaveList}
         existingList={editingList}
+      />
+
+      {/* Contribute Theme Modal - for non-host players */}
+      <ContributeThemeModal
+        isOpen={contributeModalOpen}
+        onClose={() => setContributeModalOpen(false)}
+        onContribute={handleContributeThemes}
       />
     </div>
   );

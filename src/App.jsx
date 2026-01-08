@@ -99,6 +99,7 @@ function App() {
             leaveRoom={onlineGame.leaveRoom}
             startGame={onlineGame.startOnlineGame}
             updateRoomSettings={onlineGame.updateRoomSettings}
+            contributeTheme={onlineGame.contributeTheme}
           />
         )}
 

@@ -31,8 +31,11 @@ export const useOnlineGame = (setScreen, mySessionId, localIp, playerName) => {
       console.log('Connected to server');
       newSocket.emit('requestRoomList');
       if (mySessionId) {
-        // Rejoin logic handled by another effect or here?
-        // App.jsx had it in a separate effect.
+        const lastRoomId = localStorage.getItem('lastRoomId');
+        if (lastRoomId) {
+          console.log(`Auto-rejoining room ${lastRoomId} with session ${mySessionId}`);
+          newSocket.emit('rejoinRoom', { roomId: lastRoomId, playerId: mySessionId });
+        }
       }
     });
 
@@ -110,15 +113,7 @@ export const useOnlineGame = (setScreen, mySessionId, localIp, playerName) => {
     return () => newSocket.close();
   }, [setScreen]); // Removed other dependencies to avoid re-connection loop
 
-  // Auto-rejoin
-  useEffect(() => {
-    if (socket && isConnected) {
-      const lastRoomId = localStorage.getItem('lastRoomId');
-      if (lastRoomId) {
-        socket.emit('rejoinRoom', { roomId: lastRoomId, playerId: mySessionId });
-      }
-    }
-  }, [socket, isConnected, mySessionId]);
+
 
 
   // Actions
@@ -168,10 +163,29 @@ export const useOnlineGame = (setScreen, mySessionId, localIp, playerName) => {
     }
   }, [socket, roomId]);
 
+  const contributeTheme = useCallback((themes) => {
+    if (socket && roomId) {
+      socket.emit('contributeTheme', { roomId, themes });
+    }
+  }, [socket, roomId]);
+
   const startOnlineGame = useCallback(() => {
     if (socket && isHost && roomId && roomData) {
       const themes = roomData.settings.selectedThemes || ['básico'];
-      const allWords = [...new Set(themes.flatMap(theme => THEMES[theme]))];
+
+      // Collect words from built-in themes
+      let allWords = [...new Set(themes.flatMap(theme => {
+        // Check if it's a contributed theme
+        if (theme.startsWith('contributed:')) {
+          const contributedTheme = roomData.contributedThemes?.find(t =>
+            `contributed:${t.name}:${t.contributorId}` === theme
+          );
+          return contributedTheme ? contributedTheme.words : [];
+        }
+        // Regular built-in theme
+        return THEMES[theme] || [];
+      }))];
+
       socket.emit('startGame', { roomId, words: allWords, numMonos: roomData.settings.numMonos });
     }
   }, [socket, isHost, roomId, roomData]);
@@ -222,6 +236,7 @@ export const useOnlineGame = (setScreen, mySessionId, localIp, playerName) => {
     leaveRoom,
     resetOnlineGame,
     startOnlineGame,
+    contributeTheme,
     submitHint,
     finishTurn,
     submitVote,

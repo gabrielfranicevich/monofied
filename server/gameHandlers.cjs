@@ -7,24 +7,22 @@ const { getNextActivePlayerIndex } = require('./utils.cjs');
 
 function setupGameHandlers(io, socket, rooms, broadcastRoomList, broadcastRoomUpdate) {
 
-  socket.on('startGame', ({ roomId }) => {
+  socket.on('startGame', ({ roomId, words, numMonos }) => {
     const room = rooms[roomId];
     if (room && room.hostId === socket.id && room.players.length >= 3) {
       const settings = room.settings;
       room.status = settings.type === 'chat' ? 'chat_playing' : 'playing';
 
-      // Select Word
-      const theme = settings.selectedThemes[Math.floor(Math.random() * settings.selectedThemes.length)];
-      const words = THEMES[theme];
+      // Select Word from the provided words array (includes built-in and contributed themes)
       const word = words[Math.floor(Math.random() * words.length)];
 
       // Assign Monos
-      const numMonos = settings.numMonos || 1;
+      const numMonosToAssign = numMonos || settings.numMonos || 1;
       const playerIds = room.players.map(p => p.playerId);
       const monoIds = [];
       const availableIds = [...playerIds];
 
-      for (let i = 0; i < numMonos; i++) {
+      for (let i = 0; i < numMonosToAssign; i++) {
         const randomIndex = Math.floor(Math.random() * availableIds.length);
         monoIds.push(availableIds[randomIndex]);
         availableIds.splice(randomIndex, 1);

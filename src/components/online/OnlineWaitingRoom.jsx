@@ -6,7 +6,7 @@ import GameSettingsSection from './waiting/GameSettingsSection';
 import WaitingPlayerList from './waiting/WaitingPlayerList';
 import StartGameButton from './waiting/StartGameButton';
 
-const OnlineWaitingRoom = ({ roomData, isHost, leaveRoom, startGame, updateRoomSettings }) => {
+const OnlineWaitingRoom = ({ roomData, isHost, leaveRoom, startGame, updateRoomSettings, contributeTheme }) => {
   const selectedThemes = roomData.settings.selectedThemes || ['básico'];
   const numMonos = roomData.settings.numMonos || 1;
   const currentPlayers = roomData.players.length;
@@ -82,6 +82,8 @@ const OnlineWaitingRoom = ({ roomData, isHost, leaveRoom, startGame, updateRoomS
         maxMonos={maxMonos}
         onAddMono={addMono}
         onRemoveMono={removeMono}
+        contributedThemes={roomData.contributedThemes || []}
+        onContributeTheme={contributeTheme}
       />
 
       <WaitingPlayerList
