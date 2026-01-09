@@ -4,11 +4,22 @@ import { loadWordLists, saveWordList, deleteWordList } from '../utils/customWord
 import { calculateMaxMonos } from '../utils/gameLogic';
 
 export const useOfflineGame = (setScreen) => {
+  // Load initial settings from localStorage
+  const loadInitialState = (key, defaultValue) => {
+    try {
+      const saved = localStorage.getItem(key);
+      return saved ? JSON.parse(saved) : defaultValue;
+    } catch (e) {
+      console.error('Error loading state:', e);
+      return defaultValue;
+    }
+  };
+
   // Game Setup State
-  const [selectedThemes, setSelectedThemes] = useState(['básico']);
-  const [numPlayers, setNumPlayers] = useState(3);
-  const [numMonos, setNumMonos] = useState(1);
-  const [playerNames, setPlayerNames] = useState(['', '', '']);
+  const [selectedThemes, setSelectedThemes] = useState(() => loadInitialState('mono_setup_themes', ['básico']));
+  const [numPlayers, setNumPlayers] = useState(() => loadInitialState('mono_setup_players', 3));
+  const [numMonos, setNumMonos] = useState(() => loadInitialState('mono_setup_monos', 1));
+  const [playerNames, setPlayerNames] = useState(() => loadInitialState('mono_setup_names', ['', '', '']));
 
   // Derived State
   const maxMonos = calculateMaxMonos(numPlayers);
@@ -22,6 +33,14 @@ export const useOfflineGame = (setScreen) => {
     setCustomLists(loadWordLists());
   }, []);
 
+  // Save setup settings whenever they change
+  useEffect(() => {
+    localStorage.setItem('mono_setup_themes', JSON.stringify(selectedThemes));
+    localStorage.setItem('mono_setup_players', JSON.stringify(numPlayers));
+    localStorage.setItem('mono_setup_monos', JSON.stringify(numMonos));
+    localStorage.setItem('mono_setup_names', JSON.stringify(playerNames));
+  }, [selectedThemes, numPlayers, numMonos, playerNames]);
+
   // UI State
   const [themesExpanded, setThemesExpanded] = useState(false);
   const [playersExpanded, setPlayersExpanded] = useState(false);
@@ -32,9 +51,31 @@ export const useOfflineGame = (setScreen) => {
   const [rulesExpanded, setRulesExpanded] = useState(false);
 
   // Game Play State
-  const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
-  const [gameData, setGameData] = useState(null);
+  const [currentPlayerIndex, setCurrentPlayerIndex] = useState(() => loadInitialState('mono_game_playerIndex', 0));
+  const [gameData, setGameData] = useState(() => loadInitialState('mono_game_data', null));
   const [wordRevealed, setWordRevealed] = useState(false);
+
+  // Restore screen state on mount if a game is active
+  useEffect(() => {
+    if (gameData) {
+      if (currentPlayerIndex < gameData.players.length) {
+        setScreen('reveal');
+      } else {
+        setScreen('playing');
+      }
+    }
+  }, []); // Run once on mount
+
+  // Save game state
+  useEffect(() => {
+    if (gameData) {
+      localStorage.setItem('mono_game_data', JSON.stringify(gameData));
+      localStorage.setItem('mono_game_playerIndex', JSON.stringify(currentPlayerIndex));
+    } else {
+      localStorage.removeItem('mono_game_data');
+      localStorage.removeItem('mono_game_playerIndex');
+    }
+  }, [gameData, currentPlayerIndex]);
 
   const toggleTheme = useCallback((theme) => {
     setSelectedThemes(prev => {

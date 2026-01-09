@@ -106,6 +106,13 @@ export const useOnlineGame = (setScreen, mySessionId, localIp, playerName) => {
       setScreen('online_lobby');
     });
 
+    newSocket.on('rejoinFailed', () => {
+      console.log('Rejoin failed - clearing last room');
+      localStorage.removeItem('lastRoomId');
+      setRoomId(null);
+      setRoomData(null);
+    });
+
     newSocket.on('error', (msg) => {
       alert('Error: ' + msg);
     });
