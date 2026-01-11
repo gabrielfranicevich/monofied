@@ -52,13 +52,6 @@ function sanitizeName(name) {
 }
 
 /**
- * Find room by player ID
- */
-function findRoomByPlayerId(rooms, playerId) {
-  return Object.values(rooms).find(r => r.players.some(p => p.playerId === playerId));
-}
-
-/**
  * Get next active player index (skip disconnected)
  */
 function getNextActivePlayerIndex(room, currentIndex) {
@@ -82,6 +75,6 @@ module.exports = {
   getLocalIp,
   getIpSubnet,
   sanitizeName,
-  findRoomByPlayerId,
+
   getNextActivePlayerIndex
 };

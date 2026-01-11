@@ -1,14 +1,13 @@
 /**
  * Game logic handlers
  */
-const { THEMES } = require('../src/data/gameData.json');
 const { isWordValid } = require('../utils/wordValidation.cjs');
 const { getNextActivePlayerIndex } = require('./utils.cjs');
 
-function setupGameHandlers(io, socket, rooms, broadcastRoomList, broadcastRoomUpdate) {
+function setupGameHandlers(socket, roomManager) {
 
   socket.on('startGame', ({ roomId, words, numMonos }) => {
-    const room = rooms[roomId];
+    const room = roomManager.getRoom(roomId);
     if (room && room.hostId === socket.id && room.players.length >= 3) {
       const settings = room.settings;
       room.status = settings.type === 'chat' ? 'chat_playing' : 'playing';
@@ -44,16 +43,12 @@ function setupGameHandlers(io, socket, rooms, broadcastRoomList, broadcastRoomUp
         monoGuessResult: null
       };
 
-      io.to(roomId).emit('gameStarted', room);
+      roomManager.emitToRoom(roomId, 'gameStarted', room);
     }
   });
 
-  socket.on('playerReady', ({ roomId }) => {
-    // Legacy handler
-  });
-
   socket.on('submitHint', ({ roomId, hint }) => {
-    const room = rooms[roomId];
+    const room = roomManager.getRoom(roomId);
     if (room && room.gameData && room.gameData.state === 'playing') {
       const currentPlayerIds = room.gameData.playerOrderIds;
       const currentTurnId = currentPlayerIds[room.gameData.currentTurnIndex];
@@ -77,27 +72,27 @@ function setupGameHandlers(io, socket, rooms, broadcastRoomList, broadcastRoomUp
           room.gameData.currentTurnIndex = getNextActivePlayerIndex(room, room.gameData.currentTurnIndex);
         }
 
-        io.to(roomId).emit('gameDataUpdated', room.gameData);
+        roomManager.emitToRoom(roomId, 'gameDataUpdated', room.gameData);
       }
     }
   });
 
   socket.on('finishTurn', ({ roomId }) => {
-    const room = rooms[roomId];
+    const room = roomManager.getRoom(roomId);
     if (room && room.gameData && room.gameData.state === 'playing') {
       const currentPlayerId = room.gameData.playerOrderIds[room.gameData.currentTurnIndex];
       const player = room.players.find(p => p.id === socket.id);
 
       if (player && (player.playerId === currentPlayerId || room.hostId === socket.id)) {
         room.gameData.currentTurnIndex = getNextActivePlayerIndex(room, room.gameData.currentTurnIndex);
-        io.to(roomId).emit('gameDataUpdated', room.gameData);
+        roomManager.emitToRoom(roomId, 'gameDataUpdated', room.gameData);
       }
     }
   });
 
   socket.on('submitVote', ({ roomId, voteIds }) => {
     console.log(`[DEBUG] submitVote called for room ${roomId} by socket ${socket.id}`);
-    const room = rooms[roomId];
+    const room = roomManager.getRoom(roomId);
     if (room && room.gameData && room.gameData.state === 'voting') {
       const player = room.players.find(p => p.id === socket.id);
       if (player) {
@@ -108,7 +103,7 @@ function setupGameHandlers(io, socket, rooms, broadcastRoomList, broadcastRoomUp
 
         console.log(`Voting Progress: ${votesCast}/${activePlayers.length} active players voted.`);
 
-        if (votesCast >= activePlayers.length || votesCast >= room.settings.players) {
+        if (votesCast >= activePlayers.length) {
           // Tally votes
           const voteCounts = {};
           Object.values(room.gameData.votes).flat().forEach(targetId => {
@@ -152,9 +147,9 @@ function setupGameHandlers(io, socket, rooms, broadcastRoomList, broadcastRoomUp
               .map(p => p.name);
           }
 
-          io.to(roomId).emit('gameDataUpdated', room.gameData);
+          roomManager.emitToRoom(roomId, 'gameDataUpdated', room.gameData);
         } else {
-          io.to(roomId).emit('gameDataUpdated', room.gameData);
+          roomManager.emitToRoom(roomId, 'gameDataUpdated', room.gameData);
         }
 
       } else {
@@ -164,7 +159,7 @@ function setupGameHandlers(io, socket, rooms, broadcastRoomList, broadcastRoomUp
   });
 
   socket.on('submitMonoGuess', ({ roomId, guess }) => {
-    const room = rooms[roomId];
+    const room = roomManager.getRoom(roomId);
     if (room && room.gameData && room.gameData.state === 'mono_guessing') {
       const player = room.players.find(p => p.id === socket.id);
       if (player && room.gameData.monoIds.includes(player.playerId)) {
@@ -191,18 +186,18 @@ function setupGameHandlers(io, socket, rooms, broadcastRoomList, broadcastRoomUp
               .map(p => p.name);
           }
         }
-        io.to(roomId).emit('gameDataUpdated', room.gameData);
+        roomManager.emitToRoom(roomId, 'gameDataUpdated', room.gameData);
       }
     }
   });
 
   socket.on('resetGame', ({ roomId }) => {
-    const room = rooms[roomId];
+    const room = roomManager.getRoom(roomId);
     if (room && room.hostId === socket.id) {
       room.gameData = null;
       room.status = 'waiting';
-      io.to(roomId).emit('gameReset', room);
-      broadcastRoomList();
+      roomManager.emitToRoom(roomId, 'gameReset', room);
+      roomManager.broadcastRoomList();
     }
   });
 }

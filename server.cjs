@@ -17,7 +17,8 @@ const io = socketIO(server, {
 });
 const path = require('path');
 
-// Import handler modules
+// Import handler modules and RoomManager
+const RoomManager = require('./server/RoomManager.cjs');
 const { getLocalIp } = require('./server/utils.cjs');
 const { setupRoomHandlers } = require('./server/roomHandlers.cjs');
 const { setupGameHandlers } = require('./server/gameHandlers.cjs');
@@ -37,29 +38,8 @@ app.use((req, res, next) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
-// Shared rooms state
-const rooms = {};
-
-// Helper functions available to all handlers
-function broadcastRoomList() {
-  const roomList = Object.values(rooms)
-    .filter(r => !r.isPrivate) // Only show public rooms
-    .map(r => ({
-      id: r.id,
-      name: r.roomName || r.players[0].name + "'s Game",
-      players: r.players.length,
-      maxPlayers: r.settings.players,
-      type: r.settings.type,
-      status: r.status
-    }));
-  io.emit('roomList', roomList);
-}
-
-function broadcastRoomUpdate(roomId) {
-  if (rooms[roomId]) {
-    io.to(roomId).emit('roomUpdated', rooms[roomId]);
-  }
-}
+// Initialize RoomManager
+const roomManager = new RoomManager(io);
 
 // Socket.IO connection handler
 io.on('connection', (socket) => {
@@ -68,10 +48,10 @@ io.on('connection', (socket) => {
   console.log('A user connected:', socket.id, 'IP:', clientIp);
 
   // Setup all handler modules
-  setupRoomHandlers(io, socket, rooms, broadcastRoomList, broadcastRoomUpdate, clientIp);
-  setupGameHandlers(io, socket, rooms, broadcastRoomList, broadcastRoomUpdate);
-  setupLanHandlers(io, socket, rooms, clientIp);
-  setupDisconnectHandler(io, socket, rooms, broadcastRoomList, broadcastRoomUpdate);
+  setupRoomHandlers(socket, roomManager, clientIp);
+  setupGameHandlers(socket, roomManager);
+  setupLanHandlers(socket, roomManager, clientIp);
+  setupDisconnectHandler(socket, roomManager);
 });
 
 // Start server

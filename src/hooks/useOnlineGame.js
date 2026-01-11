@@ -1,10 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
-import { io } from 'socket.io-client';
+import { useSocketConnection } from './game/useSocketConnection';
 import { THEMES } from '../data/constants';
 
 export const useOnlineGame = (setScreen, mySessionId, localIp, playerName) => {
-  const [socket, setSocket] = useState(null);
-  const [isConnected, setIsConnected] = useState(false);
+  const { socket, isConnected } = useSocketConnection();
   const [onlineGames, setOnlineGames] = useState([]);
   const [lanGames, setLanGames] = useState([]);
   const [roomId, setRoomId] = useState(null);
@@ -17,111 +16,112 @@ export const useOnlineGame = (setScreen, mySessionId, localIp, playerName) => {
   const [newGameSettings, setNewGameSettings] = useState({
     name: '',
     players: 2, // 2 = unlimited mode, shows as ∞ in UI
-    type: 'in_person'
+    type: 'in_person',
+    isPrivate: false
   });
 
-
+  // Socket Event Listeners
   useEffect(() => {
-    const serverUrl = import.meta.env.PROD ? window.location.origin : undefined;
-    const newSocket = io(serverUrl);
-    setSocket(newSocket);
+    if (!socket) return;
 
-    newSocket.on('connect', () => {
-      setIsConnected(true);
-      console.log('Connected to server');
-      newSocket.emit('requestRoomList');
-      if (mySessionId) {
-        const lastRoomId = localStorage.getItem('lastRoomId');
-        if (lastRoomId) {
-          console.log(`Auto-rejoining room ${lastRoomId} with session ${mySessionId}`);
-          newSocket.emit('rejoinRoom', { roomId: lastRoomId, playerId: mySessionId });
-        }
-      }
-    });
-
-    newSocket.on('disconnect', () => {
-      setIsConnected(false);
-      console.log('Disconnected from server');
-    });
-
-    newSocket.on('roomCreated', (room) => {
+    const handleRoomCreated = (room) => {
       console.log('Room created:', room);
       setRoomId(room.id);
       setRoomData(room);
       setScreen('online_waiting');
-    });
+    };
 
-    newSocket.on('roomList', (rooms) => {
-      setOnlineGames(rooms);
-    });
-
-    newSocket.on('lanGamesList', (games) => {
+    const handleRoomList = (rooms) => setOnlineGames(rooms);
+    const handleLanGamesList = (games) => {
       console.log('LAN games list received:', games);
       setLanGames(games);
-    });
+    };
 
-    newSocket.on('roomJoined', (room) => {
+    const handleRoomJoined = (room) => {
       console.log('Joined room:', room);
       setRoomId(room.id);
       setRoomData(room);
       setScreen('online_waiting');
-    });
+    };
 
-    newSocket.on('roomUpdated', (room) => {
+    const handleRoomUpdated = (room) => {
       console.log('Room updated:', room);
       setRoomData(room);
-    });
+    };
 
-    newSocket.on('gameStarted', (room) => {
+    const handleGameStarted = (room) => {
       console.log('Game started:', room);
       setRoomData(room);
       setScreen('online_playing');
-    });
+    };
 
-    newSocket.on('gameUpdated', (room) => {
-      console.log('Game updated:', room);
-      setRoomData(room);
-    });
-
-    newSocket.on('gameDataUpdated', (gameData) => {
+    const handleGameDataUpdated = (gameData) => {
       console.log('Game data updated:', gameData);
       setRoomData(prevRoom => {
         if (!prevRoom) return null;
         return { ...prevRoom, gameData };
       });
-    });
+    };
 
-    newSocket.on('gameReset', (room) => {
+    const handleGameReset = (room) => {
       console.log('Game reset:', room);
       setRoomData(room);
       setScreen('online_waiting');
-    });
+    };
 
-    newSocket.on('roomClosed', ({ message }) => {
+    const handleRoomClosed = ({ message }) => {
       console.log('Room closed:', message);
-      alert(message);
       alert(message);
       setRoomData(null);
       setRoomId(null);
       setScreen('online_lobby');
-    });
+    };
 
-    newSocket.on('rejoinFailed', () => {
+    const handleRejoinFailed = () => {
       console.log('Rejoin failed - clearing last room');
       localStorage.removeItem('lastRoomId');
       setRoomId(null);
       setRoomData(null);
-    });
+    };
 
-    newSocket.on('error', (msg) => {
-      alert('Error: ' + msg);
-    });
+    // Attach listeners
+    socket.on('roomCreated', handleRoomCreated);
+    socket.on('roomList', handleRoomList);
+    socket.on('lanGamesList', handleLanGamesList);
+    socket.on('roomJoined', handleRoomJoined);
+    socket.on('roomUpdated', handleRoomUpdated);
+    socket.on('gameStarted', handleGameStarted);
+    socket.on('gameDataUpdated', handleGameDataUpdated);
+    socket.on('gameReset', handleGameReset);
+    socket.on('roomClosed', handleRoomClosed);
+    socket.on('rejoinFailed', handleRejoinFailed);
 
-    return () => newSocket.close();
-  }, [setScreen]); // Removed other dependencies to avoid re-connection loop
+    // Initial requests
+    if (isConnected) {
+      socket.emit('requestRoomList');
+      if (mySessionId) {
+        const lastRoomId = localStorage.getItem('lastRoomId');
+        if (lastRoomId) {
+          console.log(`Auto-rejoining room ${lastRoomId} with session ${mySessionId}`);
+          socket.emit('rejoinRoom', { roomId: lastRoomId, playerId: mySessionId });
+        }
+      }
+    }
 
-
-
+    // Cleanup
+    return () => {
+      socket.off('roomCreated', handleRoomCreated);
+      socket.off('roomList', handleRoomList);
+      socket.off('lanGamesList', handleLanGamesList);
+      socket.off('roomJoined', handleRoomJoined);
+      socket.off('roomUpdated', handleRoomUpdated);
+      socket.off('gameStarted', handleGameStarted);
+      socket.off('gameDataUpdated', handleGameDataUpdated);
+      socket.off('gameReset', handleGameReset);
+      socket.off('roomClosed', handleRoomClosed);
+      socket.off('rejoinFailed', handleRejoinFailed);
+    };
+  }, [socket, isConnected, mySessionId, setScreen]);
 
   // Actions
   const createOnlineGame = useCallback((nameOverride) => {
@@ -236,8 +236,6 @@ export const useOnlineGame = (setScreen, mySessionId, localIp, playerName) => {
     setRoomData,
     newGameSettings,
     setNewGameSettings,
-
-    // Actions
     createOnlineGame,
     joinOnlineGame,
     updateRoomSettings,

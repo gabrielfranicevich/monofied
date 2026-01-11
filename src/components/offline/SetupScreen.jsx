@@ -1,13 +1,13 @@
 import React, { memo } from 'react';
-import { ArrowLeft, Edit2, ChevronUp, ChevronDown, Play } from './Icons';
-import { THEMES } from '../data/constants';
+import { ArrowLeft, Edit2, ChevronUp, ChevronDown, Play } from '../Icons';
+import { THEMES } from '../../data/constants';
 
-import ThemeSelector from './shared/ThemeSelector';
-import MonoCounter from './shared/MonoCounter';
-import PlayerCounter from './shared/PlayerCounter';
-import PrimaryButton from './shared/PrimaryButton';
-import InputField from './shared/InputField';
-import WordListModal from './shared/WordListModal';
+import ThemeSelector from '../shared/ThemeSelector';
+import MonoCounter from '../shared/MonoCounter';
+import PlayerCounter from '../shared/PlayerCounter';
+import PrimaryButton from '../shared/PrimaryButton';
+import InputField from '../shared/InputField';
+import WordListModal from '../shared/WordListModal';
 
 
 

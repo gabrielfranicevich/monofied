@@ -1,5 +1,4 @@
-import React from 'react';
-import { Eye } from './Icons';
+import { Eye } from '../Icons';
 
 const RevealScreen = ({ gameData, currentPlayerIndex, numPlayers, wordRevealed, showWord, isMono, nextPlayer }) => (
   <div className="p-6 flex flex-col h-[600px] relative z-10">

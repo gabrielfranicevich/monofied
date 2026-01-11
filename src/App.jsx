@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import './App.css';
 import HomeScreen from './components/HomeScreen';
-import SetupScreen from './components/SetupScreen';
-import RevealScreen from './components/RevealScreen';
-import PlayingScreen from './components/PlayingScreen';
+import SetupScreen from './components/offline/SetupScreen';
+import RevealScreen from './components/offline/RevealScreen';
+import PlayingScreen from './components/offline/PlayingScreen';
 import OnlineLobbyScreen from './components/online/OnlineLobbyScreen';
 import OnlineCreateScreen from './components/online/OnlineCreateScreen';
 import OnlineWaitingRoom from './components/online/OnlineWaitingRoom';

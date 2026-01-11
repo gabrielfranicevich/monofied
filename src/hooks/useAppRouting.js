@@ -15,8 +15,6 @@ export const useAppRouting = (screen, setScreen, roomId, setRoomId, roomData) =>
       } else if (pathUpper && pathUpper.length === 4) {
         if (setRoomId) setRoomId(pathUpper);
         setScreen('online_lobby');
-        // We replace state to /online to clean url or keep it? App logic seemed to clear it to /online.
-        // But let's stick to what App did:
         window.history.replaceState(null, '', '/online');
       } else {
         if (setRoomId) setRoomId(null);
@@ -24,10 +22,10 @@ export const useAppRouting = (screen, setScreen, roomId, setRoomId, roomData) =>
       }
     };
 
-    // Run once on mount if we are not already in a specific state?
-    // App.jsx ran this logic on mount manually.
+    // Run initial check
     const path = window.location.pathname.substring(1);
     const pathUpper = path.toUpperCase();
+
     if (path === 'offline') {
       setScreen('setup');
     } else if (path === 'online') {
@@ -46,32 +44,23 @@ export const useAppRouting = (screen, setScreen, roomId, setRoomId, roomData) =>
 
   // Update URL based on state
   useEffect(() => {
-    // Offline screens
-    if (screen === 'setup' || screen === 'reveal' || screen === 'playing') {
-      const currentPath = window.location.pathname.substring(1);
-      if (currentPath !== 'offline') {
-        window.history.pushState(null, '', '/offline');
+    const handleStateChange = () => {
+      let targetPath = '/';
+
+      if (screen === 'setup' || screen === 'reveal' || screen === 'playing') {
+        targetPath = '/offline';
+      } else if ((screen === 'online_waiting' || screen === 'online_playing') && roomData?.id) {
+        targetPath = `/${roomData.id}`;
+      } else if (screen === 'online_lobby' || screen === 'online_create') {
+        targetPath = '/online';
       }
-    }
-    // Online screens
-    else if ((screen === 'online_waiting' || screen === 'online_playing') && roomData?.id) {
-      const currentPath = window.location.pathname.substring(1);
-      if (currentPath !== roomData.id) {
-        window.history.pushState(null, '', `/${roomData.id}`);
+
+      if (window.location.pathname !== targetPath) {
+        if (targetPath === '/' && screen === 'home') return; // Don't push if already home
+        window.history.pushState(null, '', targetPath);
       }
-    } else if (screen === 'online_lobby' || screen === 'online_create') {
-      if (!roomId) {
-        const currentPath = window.location.pathname.substring(1);
-        if (currentPath !== 'online') {
-          window.history.pushState(null, '', '/online');
-        }
-      }
-      // Note: If roomId exists (pending join), App cleared URL to /online anyway.
-    } else if (screen === 'home') {
-      const currentPath = window.location.pathname;
-      if (currentPath !== '/') {
-        window.history.pushState(null, '', '/');
-      }
-    }
+    };
+
+    handleStateChange();
   }, [screen, roomData, roomId]);
 };

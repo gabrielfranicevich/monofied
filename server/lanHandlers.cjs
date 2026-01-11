@@ -3,13 +3,13 @@
  */
 const { getIpSubnet } = require('./utils.cjs');
 
-function setupLanHandlers(io, socket, rooms, clientIp) {
+function setupLanHandlers(socket, roomManager, clientIp) {
 
   socket.on('requestLanGames', ({ localIp }) => {
     const requesterPublicSubnet = getIpSubnet(clientIp);
     const requesterLocalSubnet = getIpSubnet(localIp);
 
-    const lanGames = Object.values(rooms)
+    const lanGames = roomManager.getAllRooms()
       .filter(r => {
         const roomLocalSubnet = getIpSubnet(r.creatorLocalIp);
         const roomPublicSubnet = getIpSubnet(r.creatorPublicIp);

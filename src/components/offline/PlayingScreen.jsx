@@ -1,5 +1,4 @@
-import React from 'react';
-import { Users, ChevronUp, ChevronDown, Edit2, RotateCcw } from './Icons';
+import { Users, ChevronUp, ChevronDown, Edit2, RotateCcw } from '../Icons';
 
 const PlayingScreen = ({
   gameData, numMonos, resetGame,
