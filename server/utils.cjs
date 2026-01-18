@@ -48,7 +48,7 @@ function getIpSubnet(ip) {
  */
 function sanitizeName(name) {
   if (!name) return 'Jugador';
-  return name.replace(/[^\w\sñÑáéíóúÁÉÍÓÚüÜ]/gi, '').substring(0, 15).trim() || 'Jugador';
+  return name.replace(/[^\w\s]/gi, '').substring(0, 30).trim() || 'Jugador';
 }
 
 /**

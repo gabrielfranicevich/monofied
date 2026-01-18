@@ -1,10 +1,10 @@
 import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { useOfflineGameplay } from './useOfflineGameplay';
-import { THEMES } from '../../data/constants';
+import { useOfflineGameplay } from '../src/hooks/game/useOfflineGameplay';
+import { THEMES } from '../src/data/constants';
 
 // Mock dependencies
-vi.mock('../../data/constants', () => ({
+vi.mock('../src/data/constants', () => ({
   THEMES: {
     'básico': ['word1', 'word2', 'word3']
   }

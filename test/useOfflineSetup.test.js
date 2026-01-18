@@ -1,6 +1,6 @@
 import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, beforeEach } from 'vitest';
-import { useOfflineSetup } from './useOfflineSetup';
+import { useOfflineSetup } from '../src/hooks/game/useOfflineSetup';
 
 describe('useOfflineSetup', () => {
   beforeEach(() => {

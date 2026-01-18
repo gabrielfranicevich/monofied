@@ -13,7 +13,8 @@ function setupGameHandlers(socket, roomManager) {
       room.status = settings.type === 'chat' ? 'chat_playing' : 'playing';
 
       // Select Word from the provided words array (includes built-in and contributed themes)
-      const word = words[Math.floor(Math.random() * words.length)];
+      const wordsArray = (words && words.length > 0) ? words : ['MONO'];
+      const word = wordsArray[Math.floor(Math.random() * wordsArray.length)];
 
       // Assign Monos
       const numMonosToAssign = numMonos || settings.numMonos || 1;
