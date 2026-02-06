@@ -24,7 +24,7 @@ function setupLanHandlers(socket, roomManager, clientIp) {
       })
       .map(r => ({
         id: r.id,
-        name: r.roomName || r.players[0].name + "'s Game",
+        name: r.roomName || r.players[0].name,
         players: r.players.length,
         maxPlayers: r.settings.players,
         type: r.settings.type,
