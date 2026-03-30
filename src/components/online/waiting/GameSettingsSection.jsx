@@ -14,7 +14,9 @@ const GameSettingsSection = ({
   onAddMono,
   onRemoveMono,
   contributedThemes = [],
-  onContributeTheme
+  onContributeTheme,
+  showMonoHints,
+  onToggleMonoHints
 }) => {
   const [themesExpanded, setThemesExpanded] = useState(false);
   const [monosExpanded, setMonosExpanded] = useState(false);
@@ -93,9 +95,9 @@ const GameSettingsSection = ({
         onAddMono={onAddMono}
         onRemoveMono={onRemoveMono}
         maxMonos={maxMonos}
-        expanded={monosExpanded}
-        setExpanded={setMonosExpanded}
         isHost={isHost}
+        showMonoHints={showMonoHints}
+        onToggleMonoHints={onToggleMonoHints}
       />
 
       {/* Word List Modal - for host only */}

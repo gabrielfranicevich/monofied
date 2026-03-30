@@ -130,6 +130,17 @@ const CreateGameForm = ({
         </div>
 
       </div>
+
+      {/* Hints toggle — compact inline row */}
+      <div className="flex items-center justify-between px-1">
+        <span className="text-sm font-bold text-brand-wood/70 uppercase tracking-wide">Pistas para monos</span>
+        <button
+          onClick={() => setNewGameSettings({ ...newGameSettings, showMonoHints: !newGameSettings.showMonoHints })}
+          className={`w-11 h-6 rounded-full p-0.5 transition-colors border-2 border-brand-wood ${newGameSettings.showMonoHints ? 'bg-brand-pastel-mint' : 'bg-brand-wood/20'}`}
+        >
+          <div className={`w-4 h-4 rounded-full bg-white border-2 border-brand-wood transition-transform ${newGameSettings.showMonoHints ? 'translate-x-5' : 'translate-x-0'}`} />
+        </button>
+      </div>
     </div>
   );
 };

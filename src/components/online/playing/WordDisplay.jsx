@@ -1,10 +1,29 @@
-const WordDisplay = ({ amIMono, word, gamePhase }) => {
+import { useState, useEffect } from 'react';
+import { generateHint } from '../../../utils/hintGenerator';
+
+const WordDisplay = ({ amIMono, word, gamePhase, showMonoHints }) => {
+  const [hint, setHint] = useState('');
+
+  useEffect(() => {
+    if (amIMono && word && showMonoHints) {
+      generateHint(word).then(w => setHint(w));
+    }
+  }, [amIMono, word, showMonoHints]);
+
   return (
     <div className="mb-4 p-4 bg-white rounded-2xl border-2 border-brand-wood text-center shadow-sm relative overflow-hidden">
       {amIMono ? (
         <div>
           <div className="text-6xl mb-2 animate-bounce">🐒</div>
           <div className="text-2xl font-bold text-brand-wood">¡SOS EL MONO!</div>
+          
+          {(gamePhase !== 'results' && hint) && (
+            <div className="mt-4 p-3 bg-brand-wood/5 rounded-xl border-2 border-brand-wood/10 border-dashed">
+              <div className="text-xs font-bold text-brand-wood/50 uppercase tracking-widest mb-1">Si no sabés qué decir:</div>
+              <div className="text-xl font-bold text-brand-bronze uppercase">{hint}</div>
+            </div>
+          )}
+
           {(gamePhase === 'results') && (
             <div className="mt-2 text-brand-wood/60 font-bold">La palabra era: <span className="text-brand-wood uppercase">{word}</span></div>
           )}

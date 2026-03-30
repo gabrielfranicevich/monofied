@@ -3,7 +3,7 @@ import { useLocalStorage } from '../useLocalStorage';
 import { THEMES } from '../../data/constants';
 
 export const useOfflineGameplay = (setScreen, setupData, customLists) => {
-  const { selectedThemes, numPlayers, numMonos, playerNames } = setupData;
+  const { selectedThemes, numPlayers, numMonos, playerNames, showMonoHints } = setupData;
 
   const [currentPlayerIndex, setCurrentPlayerIndex] = useLocalStorage('mono_game_playerIndex', 0);
   const [gameData, setGameData] = useLocalStorage('mono_game_data', null);
@@ -56,7 +56,8 @@ export const useOfflineGameplay = (setScreen, setupData, customLists) => {
       word: selectedWord,
       monoIndices: monoIndices,
       players: finalPlayerNames,
-      playerOrder: playerOrder
+      playerOrder: playerOrder,
+      showMonoHints: showMonoHints
     });
     setCurrentPlayerIndex(0);
     setWordRevealed(false);

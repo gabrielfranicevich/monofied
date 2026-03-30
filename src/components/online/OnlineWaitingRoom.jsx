@@ -9,6 +9,7 @@ import StartGameButton from './waiting/StartGameButton';
 const OnlineWaitingRoom = ({ roomData, isHost, leaveRoom, startGame, updateRoomSettings, contributeTheme }) => {
   const selectedThemes = roomData.settings.selectedThemes || ['básico'];
   const numMonos = roomData.settings.numMonos || 1;
+  const showMonoHints = roomData.settings.showMonoHints !== false;
   const currentPlayers = roomData.players.length;
 
   const maxMonos = calculateMaxMonos(currentPlayers);
@@ -60,6 +61,11 @@ const OnlineWaitingRoom = ({ roomData, isHost, leaveRoom, startGame, updateRoomS
     }
   };
 
+  const toggleMonoHints = () => {
+    if (!isHost) return;
+    updateRoomSettings({ showMonoHints: !showMonoHints });
+  };
+
   return (
     <div className="p-6 relative z-10 h-full flex flex-col">
       <WaitingRoomHeader
@@ -84,6 +90,8 @@ const OnlineWaitingRoom = ({ roomData, isHost, leaveRoom, startGame, updateRoomS
         onRemoveMono={removeMono}
         contributedThemes={roomData.contributedThemes || []}
         onContributeTheme={contributeTheme}
+        showMonoHints={showMonoHints}
+        onToggleMonoHints={toggleMonoHints}
       />
 
       <WaitingPlayerList

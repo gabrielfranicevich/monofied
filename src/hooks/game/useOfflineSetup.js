@@ -9,6 +9,7 @@ export const useOfflineSetup = () => {
   const [numPlayers, setNumPlayers] = useLocalStorage('mono_setup_players', 3);
   const [numMonos, setNumMonos] = useLocalStorage('mono_setup_monos', 1);
   const [playerNames, setPlayerNames] = useLocalStorage('mono_setup_names', ['', '', '']);
+  const [showMonoHints, setShowMonoHints] = useLocalStorage('mono_setup_hints', true);
 
   // Derived State
   const maxMonos = calculateMaxMonos(numPlayers);
@@ -114,6 +115,8 @@ export const useOfflineSetup = () => {
     numMonos,
     maxMonos,
     playerNames,
+    showMonoHints,
+    setShowMonoHints,
     toggleTheme,
     updatePlayerName,
     generateRandomName,

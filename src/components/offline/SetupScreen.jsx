@@ -48,7 +48,7 @@ const PlayerSection = memo(({ playerNames, numPlayers, updatePlayerName, generat
     <div className="mb-8">
       <div className="w-full bg-white rounded-2xl border-2 border-brand-wood shadow-[4px_4px_0px_0px_rgba(93,64,55,1)]">
         <div className="flex items-center justify-between p-4 flex-wrap sm:flex-nowrap gap-4">
-          <div 
+          <div
             className="flex items-center gap-3 cursor-pointer flex-1 min-w-0"
             onClick={() => setExpanded(!expanded)}
           >
@@ -62,7 +62,7 @@ const PlayerSection = memo(({ playerNames, numPlayers, updatePlayerName, generat
               </span>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-2 sm:pl-4 sm:border-l-2 sm:border-brand-wood/10">
             <button
               onClick={(e) => { e.stopPropagation(); removePlayer(); }}
@@ -80,8 +80,8 @@ const PlayerSection = memo(({ playerNames, numPlayers, updatePlayerName, generat
             >
               +
             </button>
-            <button 
-              onClick={() => setExpanded(!expanded)} 
+            <button
+              onClick={() => setExpanded(!expanded)}
               className="p-1 ml-1 hover:bg-brand-wood/10 rounded-xl transition-colors text-brand-wood"
             >
               {expanded ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
@@ -89,59 +89,59 @@ const PlayerSection = memo(({ playerNames, numPlayers, updatePlayerName, generat
           </div>
         </div>
       </div>
-    {expanded && (
-      <div className="mt-4 p-4 bg-brand-wood/5 rounded-2xl border-2 border-brand-wood/10 border-dashed">
-        <div className="space-y-3">
-          {Array.from({ length: numPlayers }).map((_, i) => (
-            <div 
-              key={i} 
-              draggable
-              onDragStart={(e) => handleDragStart(e, i)}
-              onDragOver={(e) => handleDragOver(e, i)}
-              onDragLeave={handleDragLeave}
-              onDrop={(e) => handleDrop(e, i)}
-              onDragEnd={handleDragEnd}
-              className={`flex gap-2 items-center p-2 rounded-xl border border-transparent transition-all ${draggedIndex === i ? 'opacity-50 border-brand-wood/30' : ''} ${dragOverIndex === i ? 'bg-brand-wood/10 scale-[1.02] shadow-sm' : ''}`}
+      {expanded && (
+        <div className="mt-4 p-4 bg-brand-wood/5 rounded-2xl border-2 border-brand-wood/10 border-dashed">
+          <div className="space-y-3">
+            {Array.from({ length: numPlayers }).map((_, i) => (
+              <div
+                key={i}
+                draggable
+                onDragStart={(e) => handleDragStart(e, i)}
+                onDragOver={(e) => handleDragOver(e, i)}
+                onDragLeave={handleDragLeave}
+                onDrop={(e) => handleDrop(e, i)}
+                onDragEnd={handleDragEnd}
+                className={`flex gap-2 items-center p-2 rounded-xl border border-transparent transition-all ${draggedIndex === i ? 'opacity-50 border-brand-wood/30' : ''} ${dragOverIndex === i ? 'bg-brand-wood/10 scale-[1.02] shadow-sm' : ''}`}
+              >
+                <div className="cursor-grab active:cursor-grabbing text-brand-wood/40 hover:text-brand-wood transition-colors p-1">
+                  <GripVertical size={20} />
+                </div>
+                <div className="flex-1">
+                  <InputField
+                    placeholder={`Jugador ${i + 1}`}
+                    value={playerNames[i] || ''}
+                    onChange={(e) => updatePlayerName(i, e.target.value)}
+                    containerClassName="space-y-0"
+                  />
+                </div>
+                <button
+                  onClick={() => generateRandomName(i)}
+                  className="w-12 h-12 rounded-xl bg-brand-bronze border-2 border-brand-wood text-white hover:bg-brand-wood transition-all flex items-center justify-center shadow-[2px_2px_0px_0px_rgba(93,64,55,1)] active:translate-y-0.5 active:shadow-none shrink-0"
+                  title="Nombre aleatorio"
+                >
+                  <Edit2 size={20} />
+                </button>
+                <button
+                  onClick={() => removePlayerAt(i)}
+                  disabled={numPlayers <= 3}
+                  className="w-12 h-12 rounded-xl bg-red-400 border-2 border-brand-wood text-white hover:bg-red-500 transition-all flex items-center justify-center shadow-[2px_2px_0px_0px_rgba(93,64,55,1)] active:translate-y-0.5 active:shadow-none disabled:opacity-50 disabled:shadow-none disabled:translate-y-0 shrink-0"
+                  title="Eliminar jugador"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+            ))}
+
+            <button
+              onClick={addPlayer}
+              className="w-full flex items-center justify-center gap-2 mt-2 p-3 rounded-xl bg-white/50 border-2 border-brand-wood/30 border-dashed text-brand-wood/70 font-bold hover:bg-white hover:border-brand-wood/60 hover:text-brand-wood transition-all"
             >
-              <div className="cursor-grab active:cursor-grabbing text-brand-wood/40 hover:text-brand-wood transition-colors p-1">
-                <GripVertical size={20} />
-              </div>
-              <div className="flex-1">
-                <InputField
-                  placeholder={`Jugador ${i + 1}`}
-                  value={playerNames[i] || ''}
-                  onChange={(e) => updatePlayerName(i, e.target.value)}
-                  containerClassName="space-y-0"
-                />
-              </div>
-              <button
-                onClick={() => generateRandomName(i)}
-                className="w-12 h-12 rounded-xl bg-brand-bronze border-2 border-brand-wood text-white hover:bg-brand-wood transition-all flex items-center justify-center shadow-[2px_2px_0px_0px_rgba(93,64,55,1)] active:translate-y-0.5 active:shadow-none shrink-0"
-                title="Nombre aleatorio"
-              >
-                <Edit2 size={20} />
-              </button>
-              <button
-                onClick={() => removePlayerAt(i)}
-                disabled={numPlayers <= 3}
-                className="w-12 h-12 rounded-xl bg-red-400 border-2 border-brand-wood text-white hover:bg-red-500 transition-all flex items-center justify-center shadow-[2px_2px_0px_0px_rgba(93,64,55,1)] active:translate-y-0.5 active:shadow-none disabled:opacity-50 disabled:shadow-none disabled:translate-y-0 shrink-0"
-                title="Eliminar jugador"
-              >
-                <X size={20} />
-              </button>
-            </div>
-          ))}
-          
-          <button
-            onClick={addPlayer}
-            className="w-full flex items-center justify-center gap-2 mt-2 p-3 rounded-xl bg-white/50 border-2 border-brand-wood/30 border-dashed text-brand-wood/70 font-bold hover:bg-white hover:border-brand-wood/60 hover:text-brand-wood transition-all"
-          >
-            <Plus size={20} /> Añadir Jugador
-          </button>
+              <Plus size={20} /> Añadir Jugador
+            </button>
+          </div>
         </div>
-      </div>
-    )}
-  </div>
+      )}
+    </div>
   );
 });
 
@@ -150,6 +150,7 @@ const SetupScreen = ({
   numPlayers, addPlayer, removePlayer, removePlayerAt, reorderPlayer, playersExpanded, setPlayersExpanded, maxMonos,
   numMonos, addMono, removeMono, monosExpanded, setMonosExpanded,
   playerNames, updatePlayerName, generateRandomName, namesExpanded, setNamesExpanded,
+  showMonoHints, setShowMonoHints,
   startGame,
   // New props for custom lists
   customLists, onSaveList, onEditList, onDeleteList, onOpenCreateModal,
@@ -196,6 +197,8 @@ const SetupScreen = ({
       onAddMono={addMono}
       onRemoveMono={removeMono}
       maxMonos={maxMonos}
+      showMonoHints={showMonoHints}
+      onToggleMonoHints={() => setShowMonoHints(!showMonoHints)}
     />
 
     <PrimaryButton onClick={startGame}>

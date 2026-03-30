@@ -17,7 +17,8 @@ export const useOnlineGame = (setScreen, mySessionId, localIp, playerName) => {
     name: '',
     players: 2, // 2 = unlimited mode, shows as ∞ in UI
     type: 'in_person',
-    isPrivate: false
+    isPrivate: false,
+    showMonoHints: true
   });
 
   // Socket Event Listeners
@@ -132,7 +133,8 @@ export const useOnlineGame = (setScreen, mySessionId, localIp, playerName) => {
         settings: {
           players: newGameSettings.players,
           type: newGameSettings.type,
-          isPrivate: newGameSettings.isPrivate
+          isPrivate: newGameSettings.isPrivate,
+          showMonoHints: newGameSettings.showMonoHints
         },
         playerId: mySessionId,
         localIp: localIp

@@ -31,6 +31,7 @@ const OnlinePlayingScreen = ({ roomData, playerId, submitHint, submitVote,
 
   const gamePhase = gameData.state || 'playing';
   const gameType = roomData.settings.type;
+  const showMonoHints = roomData.settings.showMonoHints !== false;
 
   // My Votes from server
   const myServerVotes = gameData.votes?.[myId]; // Array of target IDs
@@ -120,6 +121,7 @@ const OnlinePlayingScreen = ({ roomData, playerId, submitHint, submitVote,
         amIMono={amIMono}
         word={gameData.word}
         gamePhase={gamePhase}
+        showMonoHints={showMonoHints}
       />
 
       <TurnNotification

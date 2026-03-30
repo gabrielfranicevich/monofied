@@ -164,6 +164,8 @@ function App() {
             modalOpen={offlineGame.modalOpen}
             onCloseModal={offlineGame.handleCloseModal}
             editingList={offlineGame.editingList}
+            showMonoHints={offlineGame.showMonoHints}
+            setShowMonoHints={offlineGame.setShowMonoHints}
           />
         )}
 

@@ -1,7 +1,18 @@
+import { useState, useEffect } from 'react';
 import { Eye } from '../Icons';
+import { generateHint } from '../../utils/hintGenerator';
 
-const RevealScreen = ({ gameData, currentPlayerIndex, numPlayers, wordRevealed, showWord, isMono, nextPlayer }) => (
-  <div className="p-6 flex flex-col h-[600px] relative z-10">
+const RevealScreen = ({ gameData, currentPlayerIndex, numPlayers, wordRevealed, showWord, isMono, nextPlayer }) => {
+  const [hint, setHint] = useState('');
+
+  useEffect(() => {
+    if (isMono && gameData?.word && gameData?.showMonoHints !== false) {
+      generateHint(gameData.word).then(w => setHint(w));
+    }
+  }, [isMono, gameData?.word]);
+
+  return (
+    <div className="p-6 flex flex-col h-[600px] relative z-10">
     <div className="text-center mb-8">
       <div className="inline-block px-4 py-1 rounded-full bg-brand-wood/10 text-brand-wood font-bold text-xs uppercase tracking-widest mb-3">
         Jugador {currentPlayerIndex + 1} / {numPlayers}
@@ -32,6 +43,12 @@ const RevealScreen = ({ gameData, currentPlayerIndex, numPlayers, wordRevealed, 
             <div className="text-center animate-bounce">
               <div className="text-9xl mb-6 filter drop-shadow-xl">🐒</div>
               <div className="text-3xl font-bold text-brand-wood mb-2">¡SOS EL MONO!</div>
+              {(hint && gameData?.showMonoHints !== false) && (
+                <div className="mt-8 p-4 bg-brand-wood/5 rounded-2xl border-2 border-brand-wood/10 border-dashed transform -rotate-1">
+                  <div className="text-sm font-bold text-brand-wood/50 uppercase tracking-widest mb-1">Si no sabés qué decir, decí esto:</div>
+                  <div className="text-2xl font-bold text-brand-bronze uppercase">{hint}</div>
+                </div>
+              )}
             </div>
           ) : (
             <div className="text-center">
@@ -51,6 +68,7 @@ const RevealScreen = ({ gameData, currentPlayerIndex, numPlayers, wordRevealed, 
       </div>
     )}
   </div>
-);
+  );
+};
 
 export default RevealScreen;
