@@ -1,12 +1,24 @@
-import { Users, ChevronUp, ChevronDown, Edit2, RotateCcw } from '../Icons';
+import { Users, ChevronUp, ChevronDown, Edit2, RotateCcw, ArrowLeft } from '../Icons';
 
 const PlayingScreen = ({
-  gameData, numMonos, resetGame,
+  gameData, numMonos, resetGame, setScreen,
   turnOrderExpanded, setTurnOrderExpanded,
   allPlayersExpanded, setAllPlayersExpanded
 }) => (
   <div className="p-6 relative z-10">
-    <h1 className="text-3xl font-bold text-center mb-8 text-brand-wood tracking-wider">¡A JUGAR!</h1>
+    <div className="relative mb-8 flex items-center justify-center">
+      <button
+        onClick={() => {
+          setScreen('home');
+          window.history.pushState(null, '', '/');
+        }}
+        className="absolute left-0 p-2 rounded-xl hover:bg-brand-wood/10 text-brand-wood transition-all active:scale-95"
+        title="Volver al inicio"
+      >
+        <ArrowLeft size={28} />
+      </button>
+      <h1 className="text-3xl font-bold text-brand-wood tracking-wider">¡A JUGAR!</h1>
+    </div>
 
     <div className="mb-6">
       <button

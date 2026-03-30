@@ -186,6 +186,7 @@ function App() {
             gameData={offlineGame.gameData}
             numMonos={offlineGame.numMonos}
             resetGame={resetGame}
+            setScreen={setScreen}
             turnOrderExpanded={offlineGame.turnOrderExpanded}
             setTurnOrderExpanded={offlineGame.setTurnOrderExpanded}
             allPlayersExpanded={offlineGame.allPlayersExpanded}
