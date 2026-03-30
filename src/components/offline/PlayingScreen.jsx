@@ -3,8 +3,7 @@ import { Users, ChevronUp, ChevronDown, Edit2, RotateCcw } from '../Icons';
 const PlayingScreen = ({
   gameData, numMonos, resetGame,
   turnOrderExpanded, setTurnOrderExpanded,
-  allPlayersExpanded, setAllPlayersExpanded,
-  rulesExpanded, setRulesExpanded
+  allPlayersExpanded, setAllPlayersExpanded
 }) => (
   <div className="p-6 relative z-10">
     <h1 className="text-3xl font-bold text-center mb-8 text-brand-wood tracking-wider">¡A JUGAR!</h1>
@@ -34,39 +33,6 @@ const PlayingScreen = ({
               </div>
             ))}
           </div>
-        </div>
-      )}
-    </div>
-
-    <div className="mb-8">
-      <button
-        onClick={() => setRulesExpanded(!rulesExpanded)}
-        className="w-full flex items-center justify-between p-4 bg-white rounded-2xl hover:bg-brand-beige/20 transition-all border-2 border-brand-wood shadow-[4px_4px_0px_0px_rgba(93,64,55,1)] active:translate-y-1 active:shadow-[2px_2px_0px_0px_rgba(93,64,55,1)]"
-      >
-        <div className="flex items-center gap-3">
-          <div className="bg-brand-pastel-lavender p-2 rounded-lg text-brand-wood">
-            <Edit2 size={20} />
-          </div>
-          <h2 className="text-lg font-bold text-brand-wood leading-tight uppercase tracking-wide">Reglas Rápidas</h2>
-        </div>
-        {rulesExpanded ? <ChevronUp size={24} className="text-brand-wood" /> : <ChevronDown size={24} className="text-brand-wood" />}
-      </button>
-      {rulesExpanded && (
-        <div className="mt-4 p-4 bg-brand-pastel-lavender/50 rounded-2xl border-2 border-brand-wood shadow-[4px_4px_0px_0px_rgba(93,64,55,0.1)]">
-          <ul className="text-sm text-brand-wood/90 space-y-2 font-medium">
-            <li className="flex gap-2">
-              <span>🗣️</span>
-              <span>Dar pistas de las palabras por turnos</span>
-            </li>
-            <li className="flex gap-2">
-              <span>🕵️‍♂️</span>
-              <span>{numMonos > 1 ? 'Los monos tienen' : 'El mono tiene'} que intentar pasar desapercibido{numMonos > 1 ? 's' : ''}</span>
-            </li>
-            <li className="flex gap-2">
-              <span>🗳️</span>
-              <span>Votar para descubrir {numMonos > 1 ? 'a los monos' : 'al mono'}</span>
-            </li>
-          </ul>
         </div>
       )}
     </div>

@@ -34,14 +34,16 @@ const OnlineCreateScreen = ({ setScreen, newGameSettings, setNewGameSettings,
       <CreateGameHeader
         onBack={() => setScreen('online_lobby')}
         toggleSlot={
-          <SlidingToggle
-            value={newGameSettings.isPrivate || false}
-            onChange={(val) => setNewGameSettings({ ...newGameSettings, isPrivate: val })}
-            leftLabel="Pública"
-            rightLabel="Privada"
-            leftValue={false}
-            rightValue={true}
-          />
+          <div className="mr-12 z-10 shrink-0">
+            <SlidingToggle
+              value={newGameSettings.isPrivate || false}
+              onChange={(val) => setNewGameSettings({ ...newGameSettings, isPrivate: val })}
+              leftLabel="Pública"
+              rightLabel="Privada"
+              leftValue={false}
+              rightValue={true}
+            />
+          </div>
         }
       />
 

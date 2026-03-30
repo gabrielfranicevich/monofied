@@ -9,6 +9,9 @@ import OnlineCreateScreen from './components/online/OnlineCreateScreen';
 import OnlineWaitingRoom from './components/online/OnlineWaitingRoom';
 import OnlinePlayingScreen from './components/online/OnlinePlayingScreen';
 
+import HelpModal from './components/shared/HelpModal';
+import { Info } from './components/Icons';
+
 import { useSessionId } from './hooks/useSessionId';
 import { useLocalIp } from './hooks/useLocalIp';
 import { useOfflineGame } from './hooks/useOfflineGame';
@@ -17,6 +20,7 @@ import { useAppRouting } from './hooks/useAppRouting';
 
 function App() {
   const [screen, setScreen] = useState('home');
+  const [helpModalOpen, setHelpModalOpen] = useState(false);
 
   // Persist playerName
   const [playerName, setPlayerName] = useState(() => {
@@ -55,9 +59,16 @@ function App() {
     <div className="min-h-screen bg-brand-beige bg-jungle-pattern p-4 flex items-center justify-center font-sans text-brand-wood selection:bg-brand-mustard selection:text-brand-dark">
       <div className="w-full max-w-md bg-brand-cream rounded-3xl shadow-[8px_8px_0px_0px_rgba(93,64,55,0.2)] overflow-hidden border-4 border-brand-wood relative">
         <div className="absolute top-3 left-3 w-3 h-3 rounded-full bg-brand-wood/20"></div>
-        <div className="absolute top-3 right-3 w-3 h-3 rounded-full bg-brand-wood/20"></div>
         <div className="absolute bottom-3 left-3 w-3 h-3 rounded-full bg-brand-wood/20"></div>
         <div className="absolute bottom-3 right-3 w-3 h-3 rounded-full bg-brand-wood/20"></div>
+
+        <button 
+          onClick={() => setHelpModalOpen(true)}
+          className="absolute top-4 right-4 z-50 p-2 rounded-xl text-brand-wood/40 hover:text-brand-wood hover:bg-brand-wood/10 transition-all active:scale-95"
+          title="Ayuda"
+        >
+          <Info size={28} />
+        </button>
 
         {screen === 'home' && <HomeScreen setScreen={setScreen} />}
 
@@ -181,6 +192,14 @@ function App() {
             setRulesExpanded={offlineGame.setRulesExpanded}
           />
         )}
+        
+        <HelpModal 
+          isOpen={helpModalOpen} 
+          onClose={() => setHelpModalOpen(false)} 
+          screen={screen} 
+          numMonos={offlineGame?.numMonos || onlineGame?.roomData?.settings?.numMonos || 1} 
+          isHost={onlineGame?.isHost || false}
+        />
       </div>
     </div>
   );
