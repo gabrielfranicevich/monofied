@@ -70,6 +70,28 @@ export const useOfflineSetup = () => {
     }
   }, [numPlayers, numMonos, setNumPlayers, setPlayerNames, setNumMonos]);
 
+  const removePlayerAt = useCallback((index) => {
+    if (numPlayers > 3) {
+      const newNumPlayers = numPlayers - 1;
+      setNumPlayers(newNumPlayers);
+      setPlayerNames(prev => prev.filter((_, i) => i !== index));
+
+      const newMaxMonos = calculateMaxMonos(newNumPlayers);
+      if (numMonos > newMaxMonos) {
+        setNumMonos(newMaxMonos);
+      }
+    }
+  }, [numPlayers, numMonos, setNumPlayers, setPlayerNames, setNumMonos]);
+
+  const reorderPlayer = useCallback((fromIndex, toIndex) => {
+    setPlayerNames(prev => {
+      const newNames = [...prev];
+      const [movedItem] = newNames.splice(fromIndex, 1);
+      newNames.splice(toIndex, 0, movedItem);
+      return newNames;
+    });
+  }, [setPlayerNames]);
+
   const addMono = useCallback(() => {
     // Only use local maxMonos which is derived from CURRENT numPlayers
     // We re-calculate inside here or rely on the prop? 
@@ -97,6 +119,8 @@ export const useOfflineSetup = () => {
     generateRandomName,
     addPlayer,
     removePlayer,
+    removePlayerAt,
+    reorderPlayer,
     addMono,
     removeMono,
     getRandomName

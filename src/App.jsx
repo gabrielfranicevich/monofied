@@ -128,6 +128,8 @@ function App() {
             numPlayers={offlineGame.numPlayers}
             addPlayer={offlineGame.addPlayer}
             removePlayer={offlineGame.removePlayer}
+            removePlayerAt={offlineGame.removePlayerAt}
+            reorderPlayer={offlineGame.reorderPlayer}
             playersExpanded={offlineGame.playersExpanded}
             setPlayersExpanded={offlineGame.setPlayersExpanded}
             numMonos={offlineGame.numMonos}
