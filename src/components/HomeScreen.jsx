@@ -3,7 +3,7 @@ import { Play, Users } from './Icons';
 const HomeScreen = ({ setScreen }) => (
   <div className="p-8 relative z-10 flex flex-col items-center justify-center min-h-[500px]">
     <div className="mb-12 text-center transform hover:scale-105 transition-transform duration-500">
-      <div className="text-8xl mb-4 filter drop-shadow-xl animate-bounce">🐒</div>
+      <div className="text-8xl mb-4 filter drop-shadow-xl">🐒</div>
       <h1 className="text-6xl font-bold text-brand-wood tracking-wider drop-shadow-sm">MONO</h1>
     </div>
 

@@ -2,6 +2,20 @@ import { useState, useEffect } from 'react';
 import { Eye } from '../Icons';
 import { generateHint } from '../../utils/hintGenerator';
 
+/** Returns { text, className } with a mid-dash and smaller font for very long words */
+const formatWord = (word) => {
+  if (!word) return { text: '', className: '' };
+  const upper = word.toUpperCase();
+  const len = upper.length;
+  if (len > 16) {
+    const mid = Math.ceil(len / 2);
+    const hyphenated = upper.slice(0, mid) + '-\n' + upper.slice(mid);
+    return { text: hyphenated, className: 'text-3xl leading-tight' };
+  }
+  if (len > 11) return { text: upper, className: 'text-4xl' };
+  return { text: upper, className: 'text-5xl' };
+};
+
 const RevealScreen = ({ gameData, currentPlayerIndex, numPlayers, wordRevealed, showWord, isMono, nextPlayer }) => {
   const [hint, setHint] = useState('');
 
@@ -40,7 +54,7 @@ const RevealScreen = ({ gameData, currentPlayerIndex, numPlayers, wordRevealed, 
       <div className="flex-1 flex flex-col">
         <div className="flex-1 flex items-center justify-center">
           {isMono ? (
-            <div className="text-center animate-bounce">
+            <div className="text-center">
               <div className="text-9xl mb-6 filter drop-shadow-xl">🐒</div>
               <div className="text-3xl font-bold text-brand-wood mb-2">¡SOS EL MONO!</div>
               {(hint && gameData?.showMonoHints !== false) && (
@@ -52,9 +66,9 @@ const RevealScreen = ({ gameData, currentPlayerIndex, numPlayers, wordRevealed, 
             </div>
           ) : (
             <div className="text-center">
-              <div className="text-sm font-bold text-brand-wood/50 uppercase tracking-widest mb-4">La palabra es</div>
-              <div className="text-5xl font-bold text-brand-wood mb-6 bg-brand-wood/5 p-6 rounded-3xl border-2 border-brand-wood/10 border-dashed">
-                {gameData.word.toUpperCase()}
+            <div className="text-sm font-bold text-brand-wood/50 uppercase tracking-widest mb-4">La palabra es</div>
+              <div className={`${formatWord(gameData.word).className} font-bold text-brand-wood mb-6 bg-brand-wood/5 p-6 rounded-3xl border-2 border-brand-wood/10 border-dashed whitespace-pre-line`}>
+                {formatWord(gameData.word).text}
               </div>
             </div>
           )}

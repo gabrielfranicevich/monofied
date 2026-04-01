@@ -28,6 +28,34 @@ const { setupDisconnectHandler } = require('./server/disconnectHandler.cjs');
 // Serve static files
 app.use(express.static(path.join(__dirname, 'dist')));
 
+// --- Scraping Proxy Endpoint ---
+app.get('/api/scrape-slang', async (req, res) => {
+  const word = req.query.w;
+  if (!word) return res.json({ text: '' });
+
+  try {
+    // We fetch raw HTML strings concurrently and silence any internal network errors
+    const [argHtml, asiHtml] = await Promise.all([
+      fetch(`https://www.diccionarioargentino.com/term/${encodeURIComponent(word)}`)
+        .then(r => r.ok ? r.text() : '').catch(() => ''),
+      fetch(`https://www.asihablamos.com/word/palabra/${encodeURIComponent(word)}.php`)
+        .then(r => r.ok ? r.text() : '').catch(() => '')
+    ]);
+
+    // Strip script and style blocks entirely, then strip remaining HTML tags to extract pure string text
+    // We also forcefully cut off any text appearing after 'Sinónimos' so it ignores easy synonyms.
+    const cleanText = (argHtml + ' ' + asiHtml)
+      .replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi, ' ')
+      .replace(/<[^>]*>?/gm, ' ')
+      .split(/Sin[oó]nimos/i)[0];
+
+    res.json({ text: cleanText });
+  } catch (error) {
+    console.error('Slang proxy scrub failed:', error);
+    res.json({ text: '' });
+  }
+});
+
 // SPA fallback for client-side routing
 app.use((req, res, next) => {
   if (req.path.startsWith('/socket.io') ||
