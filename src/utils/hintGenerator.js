@@ -33,6 +33,67 @@ export const generateHint = async (word) => {
   if (!word) return null;
 
   try {
+    const prompt = `responde en 1 o 2 palabras o una onomatopeya, la vigésima palabra que se te viene a la cabeza cuando escuchas "${word}"`;
+    const geminiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    const hfKey = import.meta.env.VITE_HF_API_KEY;
+
+    if (geminiKey) {
+      try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: { temperature: 0.9, maxOutputTokens: 20 }
+          })
+        });
+        if (response.ok) {
+          const data = await response.json();
+          const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (text) {
+            const cleanText = text.trim().replace(/^["']|["']$/g, '').toLowerCase();
+            if (cleanText && cleanText !== word.toLowerCase()) return cleanText;
+          }
+        }
+      } catch (err) {
+        console.warn('Gemini failed, trying next option...', err);
+      }
+    }
+    
+    if (hfKey) {
+      try {
+        const response = await fetch("https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${hfKey}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            inputs: `[INST] ${prompt} [/INST]`,
+            parameters: { max_new_tokens: 15, return_full_text: false, temperature: 0.9 }
+          })
+        });
+        if (response.ok) {
+          const data = await response.json();
+          const text = data[0]?.generated_text;
+          if (text) {
+            const cleanText = text.trim().replace(/^["']|["']$/g, '').toLowerCase();
+            if (cleanText && cleanText !== word.toLowerCase()) return cleanText;
+          }
+        }
+      } catch (err) {
+        console.warn('Hugging Face failed as well...', err);
+      }
+    }
+  } catch (error) {
+    console.warn('AI hint generation failed, falling back to traditional method:', error);
+  }
+
+  return getFallbackHint(word);
+};
+
+const getFallbackHint = async (word) => {
+  try {
     const fetchPromises = [
       // 1. Wikipedia Definition
       fetch(`https://es.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(word)}`)
