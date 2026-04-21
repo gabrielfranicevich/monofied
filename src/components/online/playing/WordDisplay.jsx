@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { generateHint } from '../../../utils/hintGenerator';
+import { generateHints } from '../../../utils/hintGenerator';
 
 /** Returns { text, className } with a mid-dash and smaller font for very long words */
 const formatWord = (word) => {
@@ -21,7 +21,7 @@ const WordDisplay = ({ amIMono, word, gamePhase, showMonoHints }) => {
 
   useEffect(() => {
     if (amIMono && word && showMonoHints) {
-      generateHint(word).then(w => setHint(w));
+      generateHints(word, 1).then(hints => setHint(hints[0] || ''));
     }
   }, [amIMono, word, showMonoHints]);
 

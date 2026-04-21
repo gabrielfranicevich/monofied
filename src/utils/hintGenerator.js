@@ -12,11 +12,11 @@ const isTooSimilar = (w1, w2) => {
 };
 
 const isValidWord = (w, originalWord) => {
-  const cw = w.toLowerCase();
-  const co = originalWord.toLowerCase();
+  const cw = w.toLowerCase().trim();
+  const co = originalWord.toLowerCase().trim();
 
   return cw.length > 2 &&           // block single chars / noise
-    /^[a-záéíóúüñ]+$/.test(cw) && // only letters
+    /^[a-záéíóúüñ\s]+$/.test(cw) && // only letters and spaces
     !STOPWORDS.has(cw) &&
     !cw.includes(co) &&
     !co.includes(cw) &&
@@ -29,70 +29,92 @@ const pickRandom = (arr) => {
   return arr[Math.floor(Math.random() * arr.length)];
 };
 
-export const generateHint = async (word) => {
-  if (!word) return null;
+export const generateHints = async (word, count = 1) => {
+  if (!word || count <= 0) return [];
 
-  try {
-    const prompt = `responde en 1 o 2 palabras o una onomatopeya, la vigésima palabra que se te viene a la cabeza cuando escuchas "${word}"`;
-    const geminiKey = import.meta.env.VITE_GEMINI_API_KEY;
-    const hfKey = import.meta.env.VITE_HF_API_KEY;
+  let results = [];
+  let attempts = 0;
+  const maxAttempts = 3;
 
-    if (geminiKey) {
-      try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { temperature: 0.9, maxOutputTokens: 20 }
-          })
-        });
-        if (response.ok) {
-          const data = await response.json();
-          const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (text) {
-            const cleanText = text.trim().replace(/^["']|["']$/g, '').toLowerCase();
-            if (cleanText && cleanText !== word.toLowerCase()) return cleanText;
+  while (results.length < count && attempts < maxAttempts) {
+    const needed = count - results.length;
+    let textResult = null;
+
+    try {
+      const prompt = needed > 1 ?
+        `Dada '${word}', dame ${needed} asociaciones de 1-2 palabras o 1 onomatopeya que NO sean sinónimos directos, pero que una persona podría conectar en 2 o 3 saltos mentales. Devuelve solamente una lista separada por comas.` :
+        `Dada '${word}', dame ${needed} asociacion de 1-2 palabras o 1 onomatopeya que NO sea sinónimo directo, pero que una persona podría conectar en 2 o 3 saltos mentales. Devuelve solamente la asosiación.`;
+      
+      const geminiKey = import.meta.env.VITE_GEMINI_API_KEY;
+      const hfKey = import.meta.env.VITE_HF_API_KEY;
+
+      if (geminiKey) {
+        try {
+          const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }],
+              generationConfig: { temperature: 0.9, maxOutputTokens: 30 }
+            })
+          });
+          if (response.ok) {
+            const data = await response.json();
+            textResult = data.candidates?.[0]?.content?.parts?.[0]?.text;
           }
+        } catch (err) {
+          console.warn('Gemini failed in attempt...', err);
         }
-      } catch (err) {
-        console.warn('Gemini failed, trying next option...', err);
       }
+
+      if (!textResult && hfKey) {
+        try {
+          const response = await fetch("/api/hf-proxy", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ prompt, token: hfKey })
+          });
+          if (response.ok) {
+            const data = await response.json();
+            textResult = data[0]?.generated_text;
+          }
+        } catch (err) {
+          console.warn('Hugging Face failed in attempt...', err);
+        }
+      }
+
+      if (textResult) {
+        const parts = textResult.split(',').map(s => s.trim().replace(/^["']|["']$/g, '').toLowerCase());
+        for (const p of parts) {
+          if (p && !results.includes(p)) results.push(p);
+          if (results.length >= count) break;
+        }
+      } else {
+        // Both APIs failed or returned nothing
+        break;
+      }
+    } catch (error) {
+      console.warn('AI hint generation failed, breaking loop to use falback:', error);
+      break; 
     }
     
-    if (hfKey) {
-      try {
-        const response = await fetch("https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3", {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${hfKey}`,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            inputs: `[INST] ${prompt} [/INST]`,
-            parameters: { max_new_tokens: 15, return_full_text: false, temperature: 0.9 }
-          })
-        });
-        if (response.ok) {
-          const data = await response.json();
-          const text = data[0]?.generated_text;
-          if (text) {
-            const cleanText = text.trim().replace(/^["']|["']$/g, '').toLowerCase();
-            if (cleanText && cleanText !== word.toLowerCase()) return cleanText;
-          }
-        }
-      } catch (err) {
-        console.warn('Hugging Face failed as well...', err);
-      }
-    }
-  } catch (error) {
-    console.warn('AI hint generation failed, falling back to traditional method:', error);
+    attempts++;
   }
 
-  return getFallbackHint(word);
+  // Backfill mathematically if the AI didn't provide enough valid hints
+  if (results.length < count) {
+    const needed = count - results.length;
+    const fallbacks = await getFallbackHints(word, needed);
+    for (const f of fallbacks) {
+      if (!results.includes(f)) results.push(f);
+      if (results.length >= count) break;
+    }
+  }
+
+  return results.slice(0, count);
 };
 
-const getFallbackHint = async (word) => {
+const getFallbackHints = async (word, count) => {
   try {
     const fetchPromises = [
       // 1. Wikipedia Definition
@@ -103,12 +125,12 @@ const getFallbackHint = async (word) => {
       fetch(`https://api.datamuse.com/words?v=es&ml=${encodeURIComponent(word)}&max=20`)
         .then(r => r.ok ? r.json() : []).catch(() => []),
 
-      // 3. Wiktionary Extract (using Action API since REST definition endpoint is unavailble in es)
+      // 3. Wiktionary Extract
       fetch(`https://es.wiktionary.org/w/api.php?action=query&prop=extracts&titles=${encodeURIComponent(word)}&format=json&explaintext=1&origin=*`)
         .then(r => r.ok ? r.json() : {}).catch(() => ({})),
 
       // 4. DuckDuckGo Instant Answers
-      fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(word)}&format=json&l=es-es`)
+      fetch(`/api/ddg-proxy?q=${encodeURIComponent(word)}`)
         .then(r => r.ok ? r.json() : {}).catch(() => ({})),
 
       // 5. Wikidata Description
@@ -120,81 +142,52 @@ const getFallbackHint = async (word) => {
         .then(r => r.ok ? r.json() : {}).catch(() => ({}))
     ];
 
-    // Wait for all sites simultaneously
     const [wikiData, datamuseData, wiktData, ddgData, wdData, slangData] = await Promise.all(fetchPromises);
-
     let allWords = [];
 
-    // Parse Wikipedia (Extract top definitional words)
     if (wikiData.description || wikiData.extract) {
       const text = (wikiData.description || '') + ' ' + (wikiData.extract || '');
-      const wWords = text.split(/[\s,.;:()"']+/)
-        .map(w => w.toLowerCase())
-        .filter(w => isValidWord(w, word));
-      allWords.push(...wWords.slice(0, 20));
+      allWords.push(...text.split(/[\s,.;:()"']+/).map(w => w.toLowerCase()).filter(w => isValidWord(w, word)).slice(0, 20));
     }
-
-    // Parse Datamuse (Extract all valid related words)
     if (Array.isArray(datamuseData) && datamuseData.length > 0) {
-      const dWords = datamuseData.map(d => d.word).filter(w => isValidWord(w, word));
-      allWords.push(...dWords);
+      allWords.push(...datamuseData.map(d => d.word).filter(w => isValidWord(w, word)));
     }
-
-    // Parse Wiktionary (Extract top definitional words)
     if (wiktData?.query?.pages) {
-      const pages = Object.values(wiktData.query.pages);
-      if (pages.length > 0 && pages[0].extract) {
-        const text = pages[0].extract;
-        const wtkWords = text.split(/[\s,.;:()"'{}\[\]]+/)
-          .map(w => w.toLowerCase())
-          .filter(w => isValidWord(w, word));
-        allWords.push(...wtkWords.slice(0, 20));
+      const ObjectValues = Object.values(wiktData.query.pages);
+      if (ObjectValues.length > 0 && ObjectValues[0].extract) {
+        allWords.push(...ObjectValues[0].extract.split(/[\s,.;:()"'{}\[\]]+/).map(w => w.toLowerCase()).filter(w => isValidWord(w, word)).slice(0, 20));
       }
     }
-
-    // Parse DuckDuckGo
     if (ddgData?.AbstractText || ddgData?.RelatedTopics?.length > 0) {
       const related = (ddgData.RelatedTopics || []).map(t => t.Text || '').join(' ');
       const text = (ddgData.AbstractText || '') + ' ' + related;
-      const ddgWords = text.split(/[\s,.;:()"'{}\[\]]+/)
-        .map(w => w.toLowerCase())
-        .filter(w => isValidWord(w, word));
-      allWords.push(...ddgWords.slice(0, 20));
+      allWords.push(...text.split(/[\s,.;:()"'{}\[\]]+/).map(w => w.toLowerCase()).filter(w => isValidWord(w, word)).slice(0, 20));
     }
-
-    // Parse Wikidata
     if (wdData?.search?.length > 0) {
       const text = wdData.search[0].description || '';
-      const wdWords = text.split(/[\s,.;:()"'{}\[\]]+/)
-        .map(w => w.toLowerCase())
-        .filter(w => isValidWord(w, word));
-      allWords.push(...wdWords.slice(0, 20));
+      allWords.push(...text.split(/[\s,.;:()"'{}\[\]]+/).map(w => w.toLowerCase()).filter(w => isValidWord(w, word)).slice(0, 20));
     }
-
-    // Parse Local Scraper Data
     if (slangData?.text) {
-      const slangWords = slangData.text.split(/[\s,.;:()"'{}\[\]]+/)
-        .map(w => w.toLowerCase())
-        .filter(w => isValidWord(w, word));
-      allWords.push(...slangWords.slice(0, 20)); // Grabs up to 20 valid raw terms
+      allWords.push(...slangData.text.split(/[\s,.;:()"'{}\[\]]+/).map(w => w.toLowerCase()).filter(w => isValidWord(w, word)).slice(0, 20));
     }
 
-    // Dedup pooled words
     let uniqueWords = [...new Set(allWords)];
 
     if (uniqueWords.length > 0) {
-      // The very first word is often an obvious direct synonym (e.g. "profesional" for "arquitecto").
-      // We skip it, then limit our selection pool to a max of 50 highly relevant words from all sites.
       const skip = Math.min(1, uniqueWords.length - 1);
       const pool = uniqueWords.slice(skip, 50);
 
-      if (pool.length > 0) {
-        return pickRandom(pool);
+      const selected = [];
+      while (selected.length < count && pool.length > 0) {
+        const idx = Math.floor(Math.random() * pool.length);
+        selected.push(pool[idx]);
+        pool.splice(idx, 1);
       }
+      return selected;
     }
   } catch (error) {
     console.warn('Failed to generate pooled hint:', error);
   }
 
-  return null;
+  return [];
 };

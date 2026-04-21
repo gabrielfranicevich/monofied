@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useLocalStorage } from '../useLocalStorage';
 import { THEMES } from '../../data/constants';
+import { generateHints } from '../../utils/hintGenerator';
 
 export const useOfflineGameplay = (setScreen, setupData, customLists) => {
   const { selectedThemes, numPlayers, numMonos, playerNames, showMonoHints } = setupData;
@@ -20,7 +21,7 @@ export const useOfflineGameplay = (setScreen, setupData, customLists) => {
     }
   }, []); // Run once on mount
 
-  const startGame = useCallback(() => {
+  const startGame = useCallback(async () => {
     const allWords = [...new Set(selectedThemes.flatMap(theme => {
       if (THEMES[theme]) return THEMES[theme];
       if (customLists[theme]) return customLists[theme];
@@ -52,9 +53,17 @@ export const useOfflineGameplay = (setScreen, setupData, customLists) => {
       [playerOrder[i], playerOrder[j]] = [playerOrder[j], playerOrder[i]];
     }
 
+    let monoHints = [];
+    if (showMonoHints) {
+      if (numMonos > 0) {
+        monoHints = await generateHints(selectedWord, numMonos);
+      }
+    }
+
     setGameData({
       word: selectedWord,
       monoIndices: monoIndices,
+      monoHints: monoHints,
       players: finalPlayerNames,
       playerOrder: playerOrder,
       showMonoHints: showMonoHints

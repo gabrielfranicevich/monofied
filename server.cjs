@@ -6,6 +6,7 @@
  */
 const express = require('express');
 const app = express();
+app.use(express.json());
 const http = require('http');
 const server = http.createServer(app);
 const socketIO = require("socket.io");
@@ -28,7 +29,49 @@ const { setupDisconnectHandler } = require('./server/disconnectHandler.cjs');
 // Serve static files
 app.use(express.static(path.join(__dirname, 'dist')));
 
-// --- Scraping Proxy Endpoint ---
+// --- Proxy Endpoints ---
+app.get('/api/ddg-proxy', async (req, res) => {
+  const word = req.query.q;
+  if (!word) return res.json({});
+  try {
+    const response = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(word)}&format=json&l=es-es`);
+    const data = await response.ok ? await response.json() : {};
+    res.json(data);
+  } catch (error) {
+    res.json({});
+  }
+});
+
+app.post('/api/hf-proxy', async (req, res) => {
+  const { prompt, token } = req.body;
+  if (!prompt || !token) return res.status(400).json({ error: 'Missing parameters' });
+  try {
+    const response = await fetch("https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        inputs: `[INST] ${prompt} [/INST]`,
+        parameters: { max_new_tokens: 15, return_full_text: false, temperature: 0.9 }
+      })
+    });
+    
+    const data = await response.json().catch(() => null);
+    
+    if (!response.ok) {
+      console.error('HF Proxy inner error:', response.status, data);
+      return res.status(response.status).json(data || { error: 'Unknown HF Error' });
+    }
+    
+    res.json(data);
+  } catch (error) {
+    console.error('HF proxy catastrophic failure:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.get('/api/scrape-slang', async (req, res) => {
   const word = req.query.w;
   if (!word) return res.json({ text: '' });

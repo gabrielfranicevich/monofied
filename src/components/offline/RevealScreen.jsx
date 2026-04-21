@@ -1,6 +1,4 @@
-import { useState, useEffect } from 'react';
 import { Eye } from '../Icons';
-import { generateHint } from '../../utils/hintGenerator';
 
 /** Returns { text, className } with a mid-dash and smaller font for very long words */
 const formatWord = (word) => {
@@ -17,13 +15,8 @@ const formatWord = (word) => {
 };
 
 const RevealScreen = ({ gameData, currentPlayerIndex, numPlayers, wordRevealed, showWord, isMono, nextPlayer }) => {
-  const [hint, setHint] = useState('');
-
-  useEffect(() => {
-    if (isMono && gameData?.word && gameData?.showMonoHints !== false) {
-      generateHint(gameData.word).then(w => setHint(w));
-    }
-  }, [isMono, gameData?.word]);
+  const monoIndex = gameData?.monoIndices?.indexOf(currentPlayerIndex) ?? -1;
+  const hint = monoIndex !== -1 ? gameData?.monoHints?.[monoIndex] : null;
 
   return (
     <div className="p-6 flex flex-col h-[600px] relative z-10">

@@ -155,7 +155,15 @@ const SetupScreen = ({
   // New props for custom lists
   customLists, onSaveList, onEditList, onDeleteList, onOpenCreateModal,
   modalOpen, onCloseModal, editingList
-}) => (
+}) => {
+  const [isStarting, setIsStarting] = useState(false);
+
+  const handleStart = async () => {
+    setIsStarting(true);
+    await startGame();
+  };
+
+  return (
   <div className="p-6 relative z-10">
     <div className="relative mb-8 flex items-center justify-center">
       <button
@@ -201,9 +209,9 @@ const SetupScreen = ({
       onToggleMonoHints={() => setShowMonoHints(!showMonoHints)}
     />
 
-    <PrimaryButton onClick={startGame}>
+    <PrimaryButton onClick={handleStart} disabled={isStarting}>
       <Play size={28} />
-      JUGAR AHORA
+      {isStarting ? 'PREPARANDO...' : 'JUGAR AHORA'}
     </PrimaryButton>
 
     <WordListModal
@@ -213,6 +221,7 @@ const SetupScreen = ({
       existingList={editingList}
     />
   </div>
-);
+  );
+};
 
 export default SetupScreen;

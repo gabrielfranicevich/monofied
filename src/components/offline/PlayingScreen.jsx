@@ -61,7 +61,7 @@ const PlayingScreen = ({
             <h3 className="font-bold text-black/80 text-sm uppercase tracking-wider mb-2">
               {numMonos > 1 ? 'Los Monos eran' : 'El Mono era'}
             </h3>
-            <p className="text-2xl font-black">{monoNames.join(' y ')}</p>
+            <p className="text-2xl font-black">{new Intl.ListFormat('es', { style: 'long', type: 'conjunction' }).format(monoNames)}</p>
           </div>
         )}
       </div>
